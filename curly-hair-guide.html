@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Curly/Wavy Men's Home Trim — Interactive Guide</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #23273a;
+      --border: #2e3347;
+      --accent: #6c8ef5;
+      --text: #e2e8f0;
+      --muted: #8892a4;
+      --green: #34d399;
+      --yellow: #fbbf24;
+      --radius: 12px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    body.lb-open { overflow: hidden; }
+
+    /* ── Layout ── */
+    .page-wrap { max-width: 960px; margin: 0 auto; padding: 1.5rem 1rem 5rem; }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 2.5rem 1.25rem 1.75rem;
+      background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      background: #1e2a4a;
+      color: var(--accent);
+      border: 1px solid #334180;
+      border-radius: 999px;
+      font-size: .72rem;
+      font-weight: 700;
+      padding: .28rem .85rem;
+      margin-bottom: .9rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .hero h1 { font-size: 1.85rem; font-weight: 800; letter-spacing: -.02em; line-height: 1.2; }
+    .hero h1 span { color: var(--accent); }
+    .hero p { color: var(--muted); margin-top: .6rem; font-size: .9rem; }
+
+    /* ── Section title ── */
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+      margin-bottom: 1rem;
+    }
+
+    /* ── Section spacing ── */
+    .section { margin-bottom: 2.5rem; }
+
+    /* ═══════════════════════════════════════════
+       TAB SYSTEM  (shared by videos + images)
+    ═══════════════════════════════════════════ */
+    .tab-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .tab-nav {
+      display: flex;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      border-bottom: 1px solid var(--border);
+      padding: 0 .25rem;
+      background: var(--surface);
+    }
+    .tab-nav::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      flex-shrink: 0;
+      background: transparent;
+      border: none;
+      border-bottom: 2.5px solid transparent;
+      color: var(--muted);
+      font-size: .84rem;
+      font-weight: 600;
+      /* 44 px touch target */
+      min-height: 44px;
+      padding: 0 .95rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color .15s, border-color .15s;
+      -webkit-tap-highlight-color: transparent;
+      /* visual sub-tab label */
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .tab-btn .vtag {
+      font-size: .63rem;
+      font-weight: 700;
+      padding: .15rem .5rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .vtag-primary { background: #1e3a5f; color: #60a5fa; border: 1px solid #1e4080; }
+    .vtag-supp    { background: #1e3a2e; color: var(--green); border: 1px solid #1e4038; }
+
+    @media (hover: hover) { .tab-btn:hover { color: var(--text); } }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ═══════════════════════════════════════════
+       VIDEO PANELS
+    ═══════════════════════════════════════════ */
+    .vid-panel { padding: 1rem; }
+
+    .video-embed {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #000;
+    }
+    .video-embed iframe {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      border: none;
+    }
+
+    .video-note {
+      font-size: .83rem;
+      color: var(--muted);
+      margin-top: .85rem;
+      background: var(--surface2);
+      border-radius: 8px;
+      padding: .7rem 1rem;
+      border-left: 3px solid var(--accent);
+      line-height: 1.55;
+    }
+    .video-note strong { color: var(--text); }
+
+    /* ── Chapters ── */
+    .chapters {
+      margin-top: .85rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .chapters-header {
+      padding: .65rem 1rem;
+      background: var(--surface2);
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .chapter-list { padding: .6rem 1rem .8rem; display: flex; flex-direction: column; gap: .45rem; }
+    .chapter-item { display: flex; align-items: baseline; gap: .55rem; font-size: .84rem; line-height: 1.4; }
+    .chapter-item .ts {
+      flex-shrink: 0;
+      font-size: .72rem;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      width: 2.8rem;
+    }
+    .rdot {
+      flex-shrink: 0;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-top: .3em;
+    }
+    .rdot-high   { background: var(--green); }
+    .rdot-medium { background: var(--yellow); }
+    .rdot-low    { background: var(--muted); }
+
+    .legend {
+      display: flex;
+      gap: .85rem;
+      font-size: .75rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+      padding: 0 1rem .55rem;
+    }
+    .legend span { display: flex; align-items: center; gap: .3rem; }
+
+    /* ═══════════════════════════════════════════
+       REFERENCE IMAGE PANELS
+    ═══════════════════════════════════════════ */
+    .img-panel { padding: 1rem; }
+
+    .callout {
+      display: flex;
+      gap: .7rem;
+      padding: .85rem 1rem;
+      border-radius: 10px;
+      border: 1px solid;
+      margin-bottom: 1rem;
+    }
+    .callout-info { background: #0d1e3a; border-color: #1a3860; }
+    .callout-warn { background: #1e1700; border-color: #5a4200; }
+    .callout .ci { font-size: 1.15rem; flex-shrink: 0; line-height: 1.5; }
+    .callout p { font-size: .84rem; line-height: 1.55; color: var(--muted); }
+    .callout p strong { color: var(--text); }
+
+    .img-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: .85rem;
+    }
+
+    .img-card {
+      background: var(--surface2);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color .18s, transform .15s;
+      -webkit-tap-highlight-color: transparent;
+      /* block so nested elements don't capture events */
+      display: block;
+      text-decoration: none;
+      color: inherit;
+    }
+    @media (hover: hover) {
+      .img-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    }
+    .img-card:active { border-color: var(--accent); }
+
+    .img-card .img-thumb {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: linear-gradient(135deg, var(--surface) 0%, #1e2234 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+      color: var(--muted);
+      font-size: .78rem;
+      text-align: center;
+      padding: .75rem;
+      pointer-events: none;
+    }
+    .img-card .img-thumb .ti { font-size: 1.8rem; }
+    .img-info { padding: .6rem .8rem .75rem; pointer-events: none; }
+    .img-info .src-name { font-size: .7rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; }
+    .img-info p { font-size: .82rem; color: var(--text); margin-top: .2rem; line-height: 1.4; }
+    .img-info .src-url { font-size: .72rem; color: var(--muted); margin-top: .3rem; word-break: break-all; display: block; }
+
+    /* ═══════════════════════════════════════════
+       LIGHTBOX  (bottom-sheet on mobile)
+    ═══════════════════════════════════════════ */
+    .lightbox {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.88);
+      z-index: 900;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .lightbox.open { display: flex; }
+
+    .lb-inner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius) var(--radius) 0 0;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .lb-header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .85rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .lb-header h3 {
+      flex: 1;
+      font-size: .9rem;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .lb-close {
+      flex-shrink: 0;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: none;
+      color: var(--text);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    @media (hover: hover) { .lb-close:hover { background: #2e3347; } }
+
+    .lb-body {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 1rem;
+    }
+    .lb-body img {
+      width: 100%;
+      max-height: 48vh;
+      object-fit: contain;
+      border-radius: 8px;
+      display: block;
+      background: #070a10;
+    }
+    .lb-msg {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--muted);
+      font-size: .88rem;
+      line-height: 1.55;
+    }
+    .lb-msg strong { color: var(--text); }
+
+    .lb-footer {
+      flex-shrink: 0;
+      padding: .85rem 1rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+    }
+    .lb-open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      background: var(--accent);
+      color: #fff;
+      font-size: .85rem;
+      font-weight: 600;
+      text-decoration: none;
+      padding: .6rem 1.2rem;
+      border-radius: 8px;
+      min-height: 44px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    @media (hover: hover) { .lb-open-btn:hover { opacity: .9; } }
+
+    /* ═══════════════════════════════════════════
+       STEPS
+    ═══════════════════════════════════════════ */
+    .steps-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .steps { display: flex; flex-direction: column; gap: 1.1rem; }
+    .step { display: flex; gap: .85rem; align-items: flex-start; }
+    .step-num {
+      flex-shrink: 0;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      font-size: .82rem;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: .12rem;
+    }
+    .step-body h4 { font-size: .9rem; font-weight: 700; line-height: 1.35; }
+    .step-body p  { font-size: .84rem; color: var(--muted); margin-top: .2rem; line-height: 1.5; }
+
+    /* ═══════════════════════════════════════════
+       TIPS ACCORDION
+    ═══════════════════════════════════════════ */
+    .tip-list { display: flex; flex-direction: column; gap: .5rem; }
+    .tip-item { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+
+    .tip-toggle {
+      width: 100%;
+      background: var(--surface2);
+      border: none;
+      color: var(--text);
+      font-size: .88rem;
+      font-weight: 600;
+      min-height: 52px;
+      padding: .8rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      cursor: pointer;
+      text-align: left;
+      -webkit-tap-highlight-color: transparent;
+    }
+    @media (hover: hover) { .tip-toggle:hover { background: #252a3d; } }
+    .tip-toggle:active { background: #252a3d; }
+    .tip-icon { font-size: 1.15rem; flex-shrink: 0; }
+    .tip-caret { margin-left: auto; color: var(--muted); font-size: .9rem; transition: transform .22s; flex-shrink: 0; }
+    .tip-item.open .tip-caret { transform: rotate(180deg); }
+
+    .tip-body {
+      display: none;
+      padding: .9rem 1rem 1rem;
+      font-size: .87rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      line-height: 1.55;
+    }
+    .tip-item.open .tip-body { display: block; }
+    .tip-body p + p { margin-top: .5rem; }
+    .tip-body strong { color: var(--text); }
+    .tip-body ul { margin-top: .4rem; padding-left: 1.25rem; }
+    .tip-body li { margin-top: .35rem; }
+
+    /* ═══════════════════════════════════════════
+       JUMP NAV  (mobile only)
+    ═══════════════════════════════════════════ */
+    .jump-nav {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(15,17,23,.96);
+      border-top: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 200;
+      padding: .35rem .5rem max(env(safe-area-inset-bottom), .35rem);
+    }
+    .jump-nav-inner {
+      display: flex;
+      justify-content: space-around;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .jump-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .1rem;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: .62rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: .4rem .6rem;
+      border-radius: 8px;
+      min-width: 52px;
+      min-height: 44px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .jump-btn .ji { font-size: 1.25rem; }
+    @media (hover: hover) { .jump-btn:hover { color: var(--text); } }
+    .jump-btn:active { color: var(--accent); }
+
+    /* ═══════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════ */
+    @media (max-width: 640px) {
+      .page-wrap { padding: 1.1rem .85rem 5rem; }
+      .hero { padding: 2rem .9rem 1.5rem; }
+      .hero h1 { font-size: 1.45rem; }
+      .img-grid { grid-template-columns: 1fr 1fr; }
+      .tab-btn { font-size: .8rem; padding: 0 .75rem; }
+      .jump-nav { display: block; }
+    }
+    @media (max-width: 380px) {
+      .hero h1 { font-size: 1.25rem; }
+      .img-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ HERO ═══ -->
+<header class="hero">
+  <div class="badge">Interactive Cutting Guide</div>
+  <h1>Curly/Wavy Men's <span>Home Trim</span></h1>
+  <p>Scissors-only &nbsp;·&nbsp; 2b/2c hair &nbsp;·&nbsp; Conservative cleanup &nbsp;·&nbsp; Embedded videos &amp; reference images</p>
+</header>
+
+<div class="page-wrap">
+
+  <!-- ══════════════════════════════════════
+       VIDEOS
+  ══════════════════════════════════════ -->
+  <section class="section" id="sec-videos">
+    <div class="section-title">🎬 Tutorial Videos</div>
+
+    <div class="tab-card">
+      <!-- Tab nav -->
+      <div class="tab-nav" role="tablist" id="vid-tab-nav">
+        <button class="tab-btn active" role="tab" data-tab-group="vid" data-tab-target="vp-primary">
+          <span class="vtag vtag-primary">Primary</span> Curly Hair Scissor Cut
+        </button>
+        <button class="tab-btn" role="tab" data-tab-group="vid" data-tab-target="vp-supp1">
+          <span class="vtag vtag-supp">Supp 1</span> Wavy Hair Haircut
+        </button>
+        <button class="tab-btn" role="tab" data-tab-group="vid" data-tab-target="vp-supp2">
+          <span class="vtag vtag-supp">Supp 2</span> Wavy Hair Tutorial
+        </button>
+      </div>
+
+      <!-- Primary video panel -->
+      <div class="tab-panel vid-panel active" id="vp-primary">
+        <div class="video-embed">
+          <iframe
+            data-src="https://www.youtube-nocookie.com/embed/A_AnH9ODoQo?rel=0&playsinline=1"
+            src="about:blank"
+            title="How To Cut CURLY Hair | Men's Scissor Cut | Step by Step"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowfullscreen
+          ></iframe>
+        </div>
+        <p class="video-note">
+          <strong>The One Minute Barber (Michael Holm) · Scissors-only · ~11–14 min.</strong>
+          Best for: guide-following discipline, scissor-over-comb on sides, sequenced
+          back → sides → top → fringe workflow. Does <em>not</em> cover dry cutting,
+          vertical point-cutting, or curl-by-curl perimeter — see reference images and tips below.
+        </p>
+        <div class="chapters">
+          <div class="chapters-header">Most relevant chapters</div>
+          <div class="legend">
+            <span><span class="rdot rdot-high"></span> High</span>
+            <span><span class="rdot rdot-medium"></span> Watch if time allows</span>
+            <span><span class="rdot rdot-low"></span> Optional</span>
+          </div>
+          <div class="chapter-list">
+            <div class="chapter-item"><span class="ts">0:00</span><span class="rdot rdot-medium"></span> Intro / overview</div>
+            <div class="chapter-item"><span class="ts">~1:30</span><span class="rdot rdot-high"></span> Follow a guide / cut in a pattern — core length-setting discipline</div>
+            <div class="chapter-item"><span class="ts">~4:00</span><span class="rdot rdot-high"></span> Scissor-over-comb on curly sides — best technique for ear-area bulk</div>
+            <div class="chapter-item"><span class="ts">~7:00</span><span class="rdot rdot-medium"></span> Back and sides on longer curly hair</div>
+            <div class="chapter-item"><span class="ts">~9:00</span><span class="rdot rdot-high"></span> Top of longer curly hair — keep cuts minimal here</div>
+            <div class="chapter-item"><span class="ts">~11:00</span><span class="rdot rdot-high"></span> Long curly fringe — directly applies to middle-part shape</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Supplementary 1 -->
+      <div class="tab-panel vid-panel" id="vp-supp1">
+        <div class="video-embed">
+          <iframe
+            data-src="https://www.youtube-nocookie.com/embed/sziAQcXydxM?rel=0&playsinline=1"
+            src="about:blank"
+            title="Men's Medium Length Haircut for Wavy Hair"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowfullscreen
+          ></iframe>
+        </div>
+        <p class="video-note">
+          <strong>Maksim Nikitochkin · Scissors-only · ~5–9 min.</strong>
+          Good model for wavy/thin hair specifically. Confirmed scissors-only, no clippers.
+          Less curl-focused than the primary pick — best watched for scheme-based scissor work and texture.
+        </p>
+      </div>
+
+      <!-- Supplementary 2 -->
+      <div class="tab-panel vid-panel" id="vp-supp2">
+        <div class="video-embed">
+          <iframe
+            data-src="https://www.youtube-nocookie.com/embed/CaYnY32P4tQ?rel=0&playsinline=1"
+            src="about:blank"
+            title="Middle Length Men's Haircut for Wavy Hair Tutorial"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowfullscreen
+          ></iframe>
+        </div>
+        <p class="video-note">
+          <strong>Maksim Nikitochkin · Middle-length wavy hair tutorial.</strong>
+          Similar scheme-based scissor work to Supp 1.
+          Does not explicitly confirm no-clippers — verify before relying on it.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       REFERENCE IMAGES
+  ══════════════════════════════════════ -->
+  <section class="section" id="sec-images">
+    <div class="section-title">🖼️ Reference Images</div>
+
+    <div class="tab-card">
+      <!-- Tab nav -->
+      <div class="tab-nav" role="tablist">
+        <button class="tab-btn active" role="tab" data-tab-group="img" data-tab-target="ip-pointcut">✂️ Point-Cutting</button>
+        <button class="tab-btn" role="tab" data-tab-group="img" data-tab-target="ip-curl">🌀 Curl-by-Curl</button>
+        <button class="tab-btn" role="tab" data-tab-group="img" data-tab-target="ip-section">📐 Sectioning</button>
+        <button class="tab-btn" role="tab" data-tab-group="img" data-tab-target="ip-blunt">⚖️ Blunt vs. Point</button>
+      </div>
+
+      <!-- Point-cutting panel -->
+      <div class="tab-panel img-panel active" id="ip-pointcut">
+        <div class="callout callout-info">
+          <span class="ci">✂️</span>
+          <p><strong>Point-cutting (notching):</strong> Scissors held <em>vertically</em> — parallel to the strand — snipping small wedges into the ends instead of cutting straight across. Go lightest on tightest (2c) curls: "the ends need friends."</p>
+        </div>
+        <div class="img-grid">
+          <div class="img-card"
+               data-lb-title="Joewell — Chop Cut / Point Cut Diagram"
+               data-lb-img="https://www.joewell.co.jp/eng/images/manual_chop-cut_01.jpg"
+               data-lb-url="https://www.joewell.co.jp/eng/manual/chop-cut.html"
+               role="button" tabindex="0">
+            <div class="img-thumb"><span class="ti">✂️</span><span>Joewell<br>Point-Cut Diagram</span></div>
+            <div class="img-info">
+              <div class="src-name">Joewell</div>
+              <p>Scissors inserted vertically creating jagged, textured ends</p>
+              <span class="src-url">joewell.co.jp/eng/manual/chop-cut.html</span>
+            </div>
+          </div>
+          <div class="img-card"
+               data-lb-title="Sam Villa — Point Cutting Technique"
+               data-lb-url="https://www.samvilla.com/blogs/hair-tutorials/how-to-point-cut-hair"
+               role="button" tabindex="0">
+            <div class="img-thumb"><span class="ti">💈</span><span>Sam Villa<br>Point-Cut Entry Angle</span></div>
+            <div class="img-info">
+              <div class="src-name">Sam Villa</div>
+              <p>Vertical/diagonal entry angle; includes "ends need friends" curly-hair warning</p>
+              <span class="src-url">samvilla.com — Point Cutting Hair</span>
+            </div>
+          </div>
+          <div class="img-card"
+               data-lb-title="London School of Barbering — Point Cutting"
+               data-lb-url="https://www.londonschoolofbarbering.com/point-cutting/"
+               role="button" tabindex="0">
+            <div class="img-thumb"><span class="ti">🏫</span><span>London School<br>of Barbering</span></div>
+            <div class="img-info">
+              <div class="src-name">London School of Barbering</div>
+              <p>Educator photos showing vertical scissor-into-ends position</p>
+              <span class="src-url">londonschoolofbarbering.com</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Curl-by-curl panel -->
+      <div class="tab-panel img-panel" id="ip-curl">
+        <div class="callout callout-info">
+          <span class="ci">🌀</span>
+          <p><strong>Curl-by-curl perimeter:</strong> Take one curl/clump at a time, cut in the natural "C" curve of the curl, snipping at the point where the pattern breaks down. Avoids frizz at the ends.</p>
+        </div>
+        <div class="img-grid">
+          <div class="img-card"
+               data-lb-title="Sam Villa — Texturize & Cut Curly Hair"
+               data-lb-url="https://www.samvilla.com/blogs/hair-tutorials/curl-cutting"
+               role="button" tabindex="0">
+            <div class="img-thumb"><span class="ti">🌀</span><span>Sam Villa<br>Curl-by-Curl</span></div>
+            <div class="img-info">
+              <div class="src-name">Sam Villa</div>
+              <p>Shears curving around the curl in a "C" motion, curl by curl down to the perimeter</p>
+              <span class="src-url">samvilla.com — Curl Cutting</span>
+            </div>
+          </div>
+          <div class="img-card"
+               data-lb-title="ARC Scissors — Curly Cutting 101 (Evan Joseph)"
+               data-lb-url="https://arcscissors.com/blogs/haircut-tutorials/curly-cutting-101-with-a-curl-expert"
+               role="button" tabindex="0">
+            <div class="img-thumb"><span class="ti">✂️</span><span>ARC Scissors<br>Curly Cutting 101</span></div>
+            <div class="img-info">
+              <div class="src-name">ARC Scissors</div>
+              <p>Evan Joseph (@evanjosephcurls) — cut each curl in the larger "C" curve to maintain pattern and avoid frizz</p>
+              <span class="src-url">arcscissors.com — Curly Cutting 101</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sectioning panel -->
+      <div class="tab-panel img-panel" id="ip-section">
+        <div class="callout callout-info">
+          <span class="ci">📐</span>
+          <p><strong>Sectioning:</strong> Clip the top away first, then work back → sides → top. Small sections give you control and prevent over-cutting in any one area.</p>
+        </div>
+        <div class="img-grid">
+          <div class="img-card"
+               data-lb-title="Hairfinder — 7-Section Parting"
+               data-lb-url="https://www.hairfinder.com/techniques/sectioninghair.htm"
+               role="button" tabindex="0">
+            <div class="img-thumb"><span class="ti">📐</span><span>Hairfinder<br>7-Section Parting</span></div>
+            <div class="img-info">
+              <div class="src-name">Hairfinder</div>
+              <p>Scalp divided into 7 clipped sections — useful for managing curly hair during a cut</p>
+              <span class="src-url">hairfinder.com — Sectioning Hair</span>
+            </div>
+          </div>
+          <div class="img-card"
+               data-lb-title="Wahl — Sections of the Head"
+               data-lb-url="https://wahlusa.com/how-to/haircutting/haircuts-101/sections-head"
+               role="button" tabindex="0">
+            <div class="img-thumb"><span class="ti">🗺️</span><span>Wahl USA<br>Head Zones Diagram</span></div>
+            <div class="img-info">
+              <div class="src-name">Wahl USA</div>
+              <p>Head-diagram infographic of 4 key cutting zones, men's-cut oriented</p>
+              <span class="src-url">wahlusa.com — Sections of the Head</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Blunt vs. point panel -->
+      <div class="tab-panel img-panel" id="ip-blunt">
+        <div class="callout callout-warn">
+          <span class="ci">⚠️</span>
+          <p><strong>2c curl warning:</strong> On tighter curls, point-cutting removes end weight, causing the ends to expand and frizz. Sam Villa's "Weave &amp; Blunt" technique keeps ends blunter and preserves curl formation instead.</p>
+        </div>
+        <div class="img-grid">
+          <div class="img-card"
+               data-lb-title="Jatai Academy — Blunt vs. Point Cut Deep Dive"
+               data-lb-url="https://www.jatai.net/jataiacademy/blunt-cutting-vs-point-cutting-a-technical-deep-dive/"
+               role="button" tabindex="0">
+            <div class="img-thumb"><span class="ti">📊</span><span>Jatai Academy<br>Blunt vs. Point</span></div>
+            <div class="img-info">
+              <div class="src-name">Jatai Academy</div>
+              <p>Side-by-side of blunt straight-across edge vs. textured point-cut edge — technical deep dive</p>
+              <span class="src-url">jatai.net — Blunt vs. Point Deep Dive</span>
+            </div>
+          </div>
+          <div class="img-card"
+               data-lb-title="Sam Villa — Blunt vs. Point on Curly Hair"
+               data-lb-url="https://www.samvilla.com/blogs/hair-tutorials/how-to-point-cut-hair"
+               role="button" tabindex="0">
+            <div class="img-thumb"><span class="ti">💈</span><span>Sam Villa<br>"Ends Need Friends"</span></div>
+            <div class="img-info">
+              <div class="src-name">Sam Villa</div>
+              <p>Why blunt vs. point changes the look on curls; shows "Weave &amp; Blunt" alternative for tighter curls</p>
+              <span class="src-url">samvilla.com — Point Cutting Hair</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       STEPS
+  ══════════════════════════════════════ -->
+  <section class="section" id="sec-steps">
+    <div class="section-title">📋 Step-by-Step Cutting Plan</div>
+    <div class="steps-card">
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h4>Watch the primary video end-to-end first</h4>
+            <p>Watch The One Minute Barber video (Primary tab above) without touching your hair. Then rewatch the scissor-over-comb segment and the fringe chapter immediately before you start cutting.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h4>Review the curl-by-curl cutting reference</h4>
+            <p>Check the Sam Villa curl-cutting card (Curl-by-Curl tab) so you understand cutting in natural curl formation and snipping at the point a curl loses its pattern.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h4>Prep: style hair as normal, detangle, clip the top away</h4>
+            <p>Cut dry if possible — lower-risk because you see true shrinkage and shape. (Experts disagree: Sam Villa prefers wet for control. See Tips below.)</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <h4>Scissor-over-comb on the sides — conservative first pass</h4>
+            <p>Start at the back/sides. Remove a small amount of bulk around the ears. Stop and reassess before going further — you can always take more, not less.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <h4>Refine ends with point-cutting where needed</h4>
+            <p>Scissors vertical, tiny wedges, partial closure — reference the Joewell and Sam Villa cards (Point-Cutting tab). Go lightest on tighter 2c clumps, or keep those ends blunter.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">6</div>
+          <div class="step-body">
+            <h4>Fringe / middle-part front last</h4>
+            <p>Cut the fringe visibly longer than your target — curl spring will lift it up. Follow the fringe chapter (~11:00) of the primary video.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       TIPS ACCORDION
+  ══════════════════════════════════════ -->
+  <section class="section" id="sec-tips">
+    <div class="section-title">💡 Tips, Caveats &amp; Benchmarks</div>
+    <div class="tip-list">
+
+      <div class="tip-item">
+        <button class="tip-toggle" aria-expanded="false">
+          <span class="tip-icon">💧</span>
+          Wet vs. Dry — the expert disagreement
+          <span class="tip-caret">▾</span>
+        </button>
+        <div class="tip-body">
+          <p><strong>Dry (recommended for beginners):</strong> Cut in natural curl formation so you see true shrinkage and shape. You know exactly what you're removing. Lower-risk for a conservative first-timer cleanup.</p>
+          <p><strong>Wet (Sam Villa's view):</strong> "Cut the hair wet. You'll have greater control of the curl and of your sectioning with wet hair, because you'll be reading the natural silhouette." — <em>American Salon</em></p>
+          <p>Both are valid. For a <strong>conservative home trim</strong>, dry is the safer starting point.</p>
+        </div>
+      </div>
+
+      <div class="tip-item">
+        <button class="tip-toggle" aria-expanded="false">
+          <span class="tip-icon">🔼</span>
+          Curl spring-up — always cut longer than target
+          <span class="tip-caret">▾</span>
+        </button>
+        <div class="tip-body">
+          <p><strong>Curls spring up when dry.</strong> If you cut to your target length while wet, the hair will shrink shorter when it dries. Always leave extra — you can remove more, you can't put it back.</p>
+          <p>Applies especially to the fringe/middle-part front. Cut visibly longer, let it dry, then reassess.</p>
+        </div>
+      </div>
+
+      <div class="tip-item">
+        <button class="tip-toggle" aria-expanded="false">
+          <span class="tip-icon">⚠️</span>
+          2c curl warning — "ends need friends"
+          <span class="tip-caret">▾</span>
+        </button>
+        <div class="tip-body">
+          <p>Sam Villa: <em>"If you point cut naturally curly hair, it will take the weight away from ends, causing the ends of the hair to expand and look frizzy."</em></p>
+          <p><strong>On 2b (wavier) sections:</strong> point-cut fairly freely.</p>
+          <p><strong>On 2c (tighter) clumps:</strong> keep ends blunter. Use "Weave &amp; Blunt" — weave into the section, close your shear where you want to take weight. This removes bulk while preserving end weight that holds the curl.</p>
+          <p><strong>Stop signal:</strong> if ends look stringy or frizzy after notching, you've taken too much end weight — stop immediately on those sections.</p>
+        </div>
+      </div>
+
+      <div class="tip-item">
+        <button class="tip-toggle" aria-expanded="false">
+          <span class="tip-icon">📏</span>
+          Reducing side bulk safely
+          <span class="tip-caret">▾</span>
+        </button>
+        <div class="tip-body">
+          <p><strong>Scissor-over-comb</strong> is safer for a beginner than deep internal texturizing.</p>
+          <ul>
+            <li>Work comb upward, snipping whatever stands above the teeth</li>
+            <li>Start with comb high (removing less) — lower it for a second pass if needed</li>
+            <li>Check symmetry between sides before each pass</li>
+          </ul>
+          <p>If the sides still look bulky, take another small pass rather than cutting deeper into single sections.</p>
+        </div>
+      </div>
+
+      <div class="tip-item">
+        <button class="tip-toggle" aria-expanded="false">
+          <span class="tip-icon">🪞</span>
+          Cutting the back
+          <span class="tip-caret">▾</span>
+        </button>
+        <div class="tip-body">
+          <p>If you can't see the back clearly with a hand mirror, <strong>stop and get a second mirror or a helper</strong> rather than cutting blind. Cutting what you can't see is how you end up with an uneven neckline.</p>
+          <p>Two mirrors at right angles (bathroom mirror + handheld) give a usable back view.</p>
+        </div>
+      </div>
+
+      <div class="tip-item">
+        <button class="tip-toggle" aria-expanded="false">
+          <span class="tip-icon">📹</span>
+          What the primary video doesn't cover
+          <span class="tip-caret">▾</span>
+        </button>
+        <div class="tip-body">
+          <p>The One Minute Barber video is the best single video for this use case, but it skips:</p>
+          <ul>
+            <li><strong>Dry cutting</strong> — see Sam Villa curl-cutting reference (Curl-by-Curl tab)</li>
+            <li><strong>Vertical point-cutting / notching motion</strong> — see Joewell and Sam Villa (Point-Cutting tab)</li>
+            <li><strong>Curl-by-curl perimeter cutting</strong> — see ARC Scissors / Sam Villa (Curl-by-Curl tab)</li>
+          </ul>
+          <p>Most "men's curly scissor cut" videos are barber-on-client demos. Cutting your own back/crown is materially harder than what these videos show.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</div><!-- /page-wrap -->
+
+<!-- ══ JUMP NAV (mobile) ══ -->
+<nav class="jump-nav" aria-label="Jump to section">
+  <div class="jump-nav-inner">
+    <button class="jump-btn" data-jump="sec-videos"><span class="ji">🎬</span>Videos</button>
+    <button class="jump-btn" data-jump="sec-images"><span class="ji">🖼️</span>Images</button>
+    <button class="jump-btn" data-jump="sec-steps"><span class="ji">📋</span>Steps</button>
+    <button class="jump-btn" data-jump="sec-tips"><span class="ji">💡</span>Tips</button>
+  </div>
+</nav>
+
+<!-- ══ LIGHTBOX ══ -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lb-title">
+  <div class="lb-inner">
+    <div class="lb-header">
+      <h3 id="lb-title"></h3>
+      <button class="lb-close" id="lb-close" aria-label="Close">✕</button>
+    </div>
+    <div class="lb-body" id="lb-body"></div>
+    <div class="lb-footer">
+      <a class="lb-open-btn" id="lb-link" href="#" target="_blank" rel="noopener noreferrer">
+        Open source page ↗
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ══════════════════════════════════════════════
+   TAB SYSTEM
+   Works for both video tabs (data-tab-group="vid")
+   and image tabs (data-tab-group="img").
+   Lazy-loads iframes on first activate.
+══════════════════════════════════════════════ */
+function activateTab(btn) {
+  const group = btn.dataset.tabGroup;
+  const targetId = btn.dataset.tabTarget;
+
+  // Deactivate all buttons + panels in this group
+  document.querySelectorAll('[data-tab-group="' + group + '"]').forEach(function(b) {
+    b.classList.remove('active');
+    b.setAttribute('aria-selected', 'false');
+  });
+  document.querySelectorAll('#' + targetId.split('-')[0] + '-' + targetId.split('-').slice(1).join('-')).forEach(function(p) {
+    p.classList.remove('active');
+  });
+
+  // Simpler: query by sibling panels in the same tab-card
+  const tabCard = btn.closest('.tab-card');
+  tabCard.querySelectorAll('.tab-panel').forEach(function(p) {
+    p.classList.remove('active');
+  });
+
+  // Activate target
+  btn.classList.add('active');
+  btn.setAttribute('aria-selected', 'true');
+  const panel = document.getElementById(targetId);
+  if (panel) {
+    panel.classList.add('active');
+    // Lazy-load iframe src on first activation
+    const iframe = panel.querySelector('iframe[data-src]');
+    if (iframe && iframe.src !== iframe.dataset.src) {
+      iframe.src = iframe.dataset.src;
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════
+   TIPS ACCORDION
+══════════════════════════════════════════════ */
+function toggleTip(btn) {
+  const item = btn.closest('.tip-item');
+  const isOpen = item.classList.contains('open');
+  item.classList.toggle('open', !isOpen);
+  btn.setAttribute('aria-expanded', String(!isOpen));
+}
+
+/* ══════════════════════════════════════════════
+   LIGHTBOX
+══════════════════════════════════════════════ */
+function openLightbox(title, imgSrc, pageUrl) {
+  document.getElementById('lb-title').textContent = title;
+  var body = document.getElementById('lb-body');
+  if (imgSrc) {
+    var img = document.createElement('img');
+    img.alt = title;
+    img.src = imgSrc;
+    img.onerror = function() {
+      body.innerHTML = '<div class="lb-msg"><p>Image could not be loaded directly.</p><p style="margin-top:.5rem">Tap <strong>Open source page</strong> below to view it on the original site.</p></div>';
+    };
+    body.innerHTML = '';
+    body.appendChild(img);
+  } else {
+    body.innerHTML = '<div class="lb-msg"><p>This reference has multiple images embedded in the source page.</p><p style="margin-top:.5rem">Tap <strong>Open source page</strong> below to view the full visual reference.</p></div>';
+  }
+  document.getElementById('lb-link').href = pageUrl;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.classList.add('lb-open');
+  document.getElementById('lb-close').focus();
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.classList.remove('lb-open');
+}
+
+/* ══════════════════════════════════════════════
+   JUMP NAV
+══════════════════════════════════════════════ */
+function jumpTo(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var top = el.getBoundingClientRect().top + window.scrollY - 10;
+  window.scrollTo({ top: top, behavior: 'smooth' });
+}
+
+/* ══════════════════════════════════════════════
+   WIRE EVERYTHING UP  (no inline onclick anywhere)
+══════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function() {
+
+  // Tab buttons
+  document.querySelectorAll('[data-tab-group]').forEach(function(btn) {
+    btn.addEventListener('click', function() { activateTab(btn); });
+  });
+
+  // Eager-load the first (active) video iframe
+  var firstVidPanel = document.querySelector('#vp-primary');
+  if (firstVidPanel) {
+    var iframe = firstVidPanel.querySelector('iframe[data-src]');
+    if (iframe) iframe.src = iframe.dataset.src;
+  }
+
+  // Tips accordion
+  document.querySelectorAll('.tip-toggle').forEach(function(btn) {
+    btn.addEventListener('click', function() { toggleTip(btn); });
+  });
+
+  // Image cards → lightbox
+  document.querySelectorAll('.img-card').forEach(function(card) {
+    function open() {
+      openLightbox(
+        card.dataset.lbTitle || '',
+        card.dataset.lbImg || null,
+        card.dataset.lbUrl || '#'
+      );
+    }
+    card.addEventListener('click', open);
+    // Keyboard accessibility
+    card.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+    });
+  });
+
+  // Lightbox close
+  document.getElementById('lb-close').addEventListener('click', closeLightbox);
+  document.getElementById('lightbox').addEventListener('click', function(e) {
+    if (e.target === this) closeLightbox();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLightbox();
+  });
+
+  // Jump nav
+  document.querySelectorAll('[data-jump]').forEach(function(btn) {
+    btn.addEventListener('click', function() { jumpTo(btn.dataset.jump); });
+  });
+
+});
+</script>
+
+</body>
+</html>
