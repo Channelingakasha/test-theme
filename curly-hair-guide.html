@@ -27,22 +27,25 @@
       background: var(--bg);
       color: var(--text);
       line-height: 1.6;
+      /* prevent horizontal overflow from any overflow-x: auto children */
+      overflow-x: hidden;
     }
+    body.lb-open { overflow: hidden; }
 
     /* ── Layout ── */
-    .page-wrap { max-width: 1000px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+    .page-wrap { max-width: 1000px; margin: 0 auto; padding: 1.5rem 1rem 5rem; }
 
     /* ── Hero ── */
     .hero {
       text-align: center;
-      padding: 3rem 1rem 2rem;
+      padding: 2.5rem 1rem 1.75rem;
       background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
       border-bottom: 1px solid var(--border);
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
     }
-    .hero h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+    .hero h1 { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.02em; }
     .hero h1 span { color: var(--accent); }
-    .hero p { color: var(--muted); margin-top: .6rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .hero p { color: var(--muted); margin-top: .6rem; max-width: 600px; margin-left: auto; margin-right: auto; font-size: .9rem; }
     .badge {
       display: inline-block;
       background: #1e2a4a;
@@ -51,7 +54,7 @@
       border-radius: 999px;
       font-size: .75rem;
       font-weight: 600;
-      padding: .25rem .75rem;
+      padding: .3rem .85rem;
       margin-bottom: 1rem;
       letter-spacing: .04em;
       text-transform: uppercase;
@@ -59,15 +62,15 @@
 
     /* ── Section titles ── */
     .section-title {
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       font-weight: 700;
       color: var(--text);
       display: flex;
       align-items: center;
       gap: .5rem;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1rem;
     }
-    .section-title .icon { font-size: 1.3rem; }
+    .section-title .icon { font-size: 1.25rem; }
 
     /* ── Cards ── */
     .card {
@@ -79,47 +82,59 @@
     .card + .card { margin-top: 1.25rem; }
 
     /* ── Video section ── */
-    .video-grid { display: flex; flex-direction: column; gap: 1.25rem; }
+    .video-grid { display: flex; flex-direction: column; gap: 1rem; }
 
     .video-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
 
     .video-header {
-      padding: 1rem 1.25rem;
+      /* min-height 56px ensures touch target ≥44px even with padding */
+      min-height: 56px;
+      padding: .85rem 1rem;
       display: flex;
       align-items: flex-start;
-      gap: .75rem;
+      gap: .65rem;
       cursor: pointer;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
-    .video-header:hover { background: var(--surface2); }
+    @media (hover: hover) {
+      .video-header:hover { background: var(--surface2); }
+    }
+    .video-header:active { background: var(--surface2); }
 
     .video-tag {
       flex-shrink: 0;
-      font-size: .7rem;
+      font-size: .68rem;
       font-weight: 700;
-      padding: .2rem .6rem;
+      padding: .22rem .6rem;
       border-radius: 999px;
       letter-spacing: .06em;
       text-transform: uppercase;
+      /* keeps tag on its own line on very narrow screens */
+      align-self: flex-start;
+      margin-top: .05rem;
     }
     .tag-primary { background: #1e3a5f; color: #60a5fa; border: 1px solid #1e4080; }
     .tag-supp    { background: #1e3a2e; color: #34d399; border: 1px solid #1e4038; }
 
-    .video-meta { flex: 1; }
-    .video-meta h3 { font-size: .95rem; font-weight: 600; }
+    .video-meta { flex: 1; min-width: 0; }
+    .video-meta h3 { font-size: .93rem; font-weight: 600; line-height: 1.35; }
     .video-meta p  { font-size: .82rem; color: var(--muted); margin-top: .2rem; }
 
     .expand-icon {
       flex-shrink: 0;
       color: var(--muted);
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       transition: transform .25s;
+      margin-top: .1rem;
+      /* pad out to make the hit area feel bigger */
+      padding: .25rem;
     }
     .video-card.open .expand-icon { transform: rotate(180deg); }
 
     .video-embed-wrap {
       display: none;
-      padding: 0 1.25rem 1.25rem;
+      padding: 0 1rem 1rem;
     }
     .video-card.open .video-embed-wrap { display: block; }
 
@@ -136,37 +151,40 @@
       border: none;
     }
     .video-note {
-      font-size: .8rem;
+      font-size: .82rem;
       color: var(--muted);
       margin-top: .75rem;
       background: var(--surface2);
       border-radius: 8px;
-      padding: .6rem .9rem;
+      padding: .65rem .9rem;
       border-left: 3px solid var(--accent);
+      line-height: 1.5;
     }
 
     /* ── Chapters ── */
-    .chapters { padding: .75rem 1.25rem 1rem; border-top: 1px solid var(--border); }
-    .chapters h4 { font-size: .8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .6rem; }
-    .chapter-list { display: flex; flex-direction: column; gap: .35rem; }
+    .chapters { padding: .75rem 1rem 1rem; border-top: 1px solid var(--border); }
+    .chapters h4 { font-size: .78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .6rem; }
+    .chapter-list { display: flex; flex-direction: column; gap: .4rem; }
     .chapter-item {
       display: flex;
-      align-items: center;
-      gap: .6rem;
-      font-size: .83rem;
+      align-items: baseline;
+      gap: .55rem;
+      font-size: .84rem;
+      line-height: 1.4;
     }
     .chapter-item .ts {
       flex-shrink: 0;
-      font-size: .7rem;
+      font-size: .72rem;
       color: var(--accent);
       font-variant-numeric: tabular-nums;
       font-weight: 600;
-      width: 3rem;
+      width: 2.8rem;
     }
     .relevance-dot {
-      width: 7px; height: 7px;
+      width: 8px; height: 8px;
       border-radius: 50%;
       flex-shrink: 0;
+      margin-top: .3em;
     }
     .high   { background: var(--green); }
     .medium { background: var(--yellow); }
@@ -175,31 +193,40 @@
     /* ── Tabs ── */
     .tab-nav {
       display: flex;
-      gap: .25rem;
-      padding: 1rem 1.25rem 0;
+      gap: 0;
+      padding: 0 .5rem;
       border-bottom: 1px solid var(--border);
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
+    .tab-nav::-webkit-scrollbar { display: none; }
+
     .tab-btn {
       background: transparent;
       border: none;
       color: var(--muted);
-      font-size: .85rem;
+      font-size: .84rem;
       font-weight: 600;
-      padding: .5rem .9rem;
+      /* min 44px touch target height */
+      min-height: 44px;
+      padding: 0 .9rem;
       cursor: pointer;
       border-bottom: 2px solid transparent;
       white-space: nowrap;
       transition: color .15s, border-color .15s;
+      -webkit-tap-highlight-color: transparent;
     }
-    .tab-btn:hover { color: var(--text); }
+    @media (hover: hover) {
+      .tab-btn:hover { color: var(--text); }
+    }
     .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-    .tab-content { padding: 1.25rem; display: none; }
+    .tab-content { padding: 1rem; display: none; }
     .tab-content.active { display: block; }
 
     /* ── Reference images ── */
-    .img-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+    .img-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: .85rem; }
 
     .img-card {
       background: var(--surface2);
@@ -207,20 +234,17 @@
       border-radius: 10px;
       overflow: hidden;
       cursor: pointer;
-      transition: border-color .2s, transform .15s;
+      transition: border-color .2s;
+      -webkit-tap-highlight-color: transparent;
     }
-    .img-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    @media (hover: hover) {
+      .img-card:hover { border-color: var(--accent); }
+    }
+    .img-card:active { border-color: var(--accent); }
 
-    .img-card .thumb {
-      width: 100%;
-      aspect-ratio: 4/3;
-      object-fit: cover;
-      background: var(--surface);
-      display: block;
-    }
     .img-card .img-fallback {
       width: 100%;
-      aspect-ratio: 4/3;
+      aspect-ratio: 16/9;
       background: linear-gradient(135deg, var(--surface) 0%, #1e2234 100%);
       display: flex;
       flex-direction: column;
@@ -228,65 +252,95 @@
       justify-content: center;
       gap: .4rem;
       color: var(--muted);
-      font-size: .75rem;
+      font-size: .78rem;
       text-align: center;
       padding: .75rem;
     }
-    .img-card .img-fallback .icon { font-size: 2rem; }
+    .img-card .img-fallback .icon { font-size: 1.8rem; }
 
-    .img-info { padding: .65rem .8rem; }
+    .img-info { padding: .6rem .75rem .75rem; }
     .img-info .src-name { font-size: .72rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .05em; }
-    .img-info p { font-size: .8rem; color: var(--text); margin-top: .15rem; }
+    .img-info p { font-size: .82rem; color: var(--text); margin-top: .2rem; line-height: 1.4; }
     .img-info a {
-      font-size: .72rem;
+      font-size: .75rem;
       color: var(--muted);
       text-decoration: none;
       display: inline-block;
-      margin-top: .3rem;
+      margin-top: .35rem;
       word-break: break-all;
     }
-    .img-info a:hover { color: var(--accent); }
+    @media (hover: hover) {
+      .img-info a:hover { color: var(--accent); }
+    }
 
     /* ── Lightbox ── */
     .lightbox {
       display: none;
       position: fixed; inset: 0;
-      background: rgba(0,0,0,.88);
+      background: rgba(0,0,0,.9);
       z-index: 1000;
-      align-items: center;
+      align-items: flex-end;   /* bottom-sheet on mobile */
       justify-content: center;
-      padding: 1rem;
+      padding: 0;
     }
     .lightbox.open { display: flex; }
     .lightbox-inner {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      max-width: 800px;
+      border-radius: var(--radius) var(--radius) 0 0;
       width: 100%;
+      max-width: 100%;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
     }
     .lightbox-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: .75rem 1rem;
+      padding: .85rem 1rem;
       border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      gap: .75rem;
     }
-    .lightbox-header h3 { font-size: .95rem; font-weight: 600; }
+    .lightbox-header h3 {
+      font-size: .9rem;
+      font-weight: 600;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .lightbox-close {
-      background: transparent;
+      flex-shrink: 0;
+      background: var(--surface2);
       border: none;
-      color: var(--muted);
-      font-size: 1.4rem;
+      color: var(--text);
+      font-size: 1rem;
       cursor: pointer;
       line-height: 1;
+      /* 44×44 touch target */
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
     }
-    .lightbox-close:hover { color: var(--text); }
-    .lightbox-body { padding: 1rem; }
+    @media (hover: hover) {
+      .lightbox-close:hover { background: #2e3347; }
+    }
+    .lightbox-body {
+      padding: 1rem;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      flex: 1;
+    }
     .lightbox-body img {
       width: 100%;
-      max-height: 60vh;
+      max-height: 50vh;
       object-fit: contain;
       border-radius: 8px;
       display: block;
@@ -294,25 +348,38 @@
     }
     .lightbox-body .lightbox-msg {
       text-align: center;
-      padding: 2rem;
+      padding: 2rem 1rem;
       color: var(--muted);
+      font-size: .88rem;
+      line-height: 1.55;
     }
     .lightbox-footer {
-      padding: .75rem 1rem;
+      padding: .85rem 1rem;
       border-top: 1px solid var(--border);
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-end;
       gap: .5rem;
-      flex-wrap: wrap;
+      flex-shrink: 0;
     }
     .lightbox-footer p { font-size: .82rem; color: var(--muted); }
     .lightbox-footer a {
-      font-size: .82rem;
-      color: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      font-size: .85rem;
+      font-weight: 600;
+      color: #fff;
+      background: var(--accent);
       text-decoration: none;
+      padding: .55rem 1.1rem;
+      border-radius: 8px;
+      min-height: 44px;
+      -webkit-tap-highlight-color: transparent;
     }
-    .lightbox-footer a:hover { text-decoration: underline; }
+    @media (hover: hover) {
+      .lightbox-footer a:hover { opacity: .9; }
+    }
 
     /* ── Tips accordion ── */
     .tip-list { display: flex; flex-direction: column; gap: .5rem; }
@@ -329,23 +396,29 @@
       color: var(--text);
       font-size: .88rem;
       font-weight: 600;
+      /* 44px min touch target */
+      min-height: 52px;
       padding: .8rem 1rem;
       display: flex;
       align-items: center;
       gap: .7rem;
       cursor: pointer;
       text-align: left;
+      -webkit-tap-highlight-color: transparent;
     }
-    .tip-toggle:hover { background: #2a2f45; }
-    .tip-toggle .tip-icon { font-size: 1.1rem; flex-shrink: 0; }
-    .tip-toggle .tip-caret { margin-left: auto; color: var(--muted); transition: transform .25s; }
+    @media (hover: hover) {
+      .tip-toggle:hover { background: #2a2f45; }
+    }
+    .tip-toggle:active { background: #2a2f45; }
+    .tip-toggle .tip-icon { font-size: 1.15rem; flex-shrink: 0; }
+    .tip-toggle .tip-caret { margin-left: auto; color: var(--muted); transition: transform .25s; flex-shrink: 0; }
     .tip-item.open .tip-caret { transform: rotate(180deg); }
-    .tip-body { display: none; padding: .9rem 1rem 1rem; font-size: .87rem; color: var(--muted); border-top: 1px solid var(--border); }
+    .tip-body { display: none; padding: .9rem 1rem 1rem; font-size: .87rem; color: var(--muted); border-top: 1px solid var(--border); line-height: 1.55; }
     .tip-item.open .tip-body { display: block; }
-    .tip-body p + p { margin-top: .5rem; }
+    .tip-body p + p { margin-top: .55rem; }
     .tip-body strong { color: var(--text); }
-    .tip-body ul { margin-top: .4rem; padding-left: 1.2rem; }
-    .tip-body li { margin-top: .3rem; }
+    .tip-body ul { margin-top: .45rem; padding-left: 1.25rem; }
+    .tip-body li { margin-top: .35rem; }
 
     /* ── Callout ── */
     .callout {
@@ -358,7 +431,7 @@
     }
     .callout-warn { background: #1e1700; border-color: #5a4200; }
     .callout-info { background: #0d1e3a; border-color: #1a3860; }
-    .callout .ci { font-size: 1.2rem; flex-shrink: 0; }
+    .callout .ci { font-size: 1.2rem; flex-shrink: 0; line-height: 1.5; }
     .callout p { font-size: .84rem; line-height: 1.55; }
     .callout p strong { color: var(--text); }
 
@@ -366,7 +439,7 @@
     .steps { display: flex; flex-direction: column; gap: 1rem; }
     .step {
       display: flex;
-      gap: 1rem;
+      gap: .85rem;
       align-items: flex-start;
     }
     .step-num {
@@ -380,32 +453,95 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      margin-top: .1rem;
     }
-    .step-body h4 { font-size: .9rem; font-weight: 700; }
-    .step-body p  { font-size: .84rem; color: var(--muted); margin-top: .2rem; }
+    .step-body h4 { font-size: .9rem; font-weight: 700; line-height: 1.35; }
+    .step-body p  { font-size: .84rem; color: var(--muted); margin-top: .25rem; line-height: 1.5; }
 
     /* ── Legend ── */
     .legend {
       display: flex;
-      gap: 1rem;
+      gap: .85rem;
       font-size: .78rem;
       color: var(--muted);
       margin-bottom: .75rem;
       flex-wrap: wrap;
     }
     .legend span { display: flex; align-items: center; gap: .3rem; }
-    .legend-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-    }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
 
     /* ── Section spacing ── */
-    .section { margin-bottom: 2.5rem; }
+    .section { margin-bottom: 2.25rem; }
+
+    /* ── Jump nav (mobile only) ── */
+    .jump-nav {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(15,17,23,.96);
+      border-top: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 100;
+      padding: .4rem .5rem max(env(safe-area-inset-bottom), .4rem);
+    }
+    .jump-nav-inner {
+      display: flex;
+      justify-content: space-around;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .jump-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .1rem;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: .62rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: .4rem .5rem;
+      border-radius: 8px;
+      min-width: 56px;
+      min-height: 44px;
+      letter-spacing: .02em;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .jump-btn .ji { font-size: 1.3rem; }
+    @media (hover: hover) {
+      .jump-btn:hover { color: var(--text); }
+    }
+    .jump-btn:active { color: var(--accent); }
 
     /* ── Responsive ── */
-    @media (max-width: 600px) {
+    @media (max-width: 640px) {
+      .page-wrap { padding: 1.25rem .9rem 4.5rem; }
+      .hero { padding: 2rem .9rem 1.5rem; }
       .hero h1 { font-size: 1.5rem; }
-      .img-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+      .hero p { font-size: .85rem; }
+
+      /* Stack tag above title in video header on small screens */
+      .video-header { flex-wrap: wrap; }
+      .video-meta { order: 2; width: calc(100% - 2rem); }
+      .video-tag { order: 1; }
+      .expand-icon { order: 3; }
+
+      .img-grid { grid-template-columns: 1fr 1fr; }
+
+      /* Tighten tab padding */
+      .tab-btn { padding: 0 .7rem; font-size: .82rem; }
+
+      /* Lightbox already bottom-sheet; bump up img max-height */
+      .lightbox-body img { max-height: 45vh; }
+
+      .jump-nav { display: block; }
+    }
+
+    @media (max-width: 380px) {
+      .img-grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 1.3rem; }
     }
   </style>
 </head>
@@ -421,7 +557,7 @@
 <div class="page-wrap">
 
   <!-- ── VIDEOS ── -->
-  <div class="section">
+  <div class="section" id="sec-videos">
     <div class="section-title"><span class="icon">🎬</span> Tutorial Videos</div>
 
     <!-- Primary -->
@@ -521,7 +657,7 @@
   </div>
 
   <!-- ── REFERENCE IMAGES ── -->
-  <div class="section">
+  <div class="section" id="sec-images">
     <div class="section-title"><span class="icon">🖼️</span> Reference Images</div>
 
     <div class="card">
@@ -674,7 +810,7 @@
   </div>
 
   <!-- ── STEP-BY-STEP PLAN ── -->
-  <div class="section">
+  <div class="section" id="sec-steps">
     <div class="section-title"><span class="icon">📋</span> Step-by-Step Cutting Plan</div>
     <div class="card" style="padding: 1.25rem;">
       <div class="steps">
@@ -725,7 +861,7 @@
   </div>
 
   <!-- ── TIPS ACCORDION ── -->
-  <div class="section">
+  <div class="section" id="sec-tips">
     <div class="section-title"><span class="icon">💡</span> Tips, Caveats &amp; Benchmarks</div>
     <div class="tip-list">
 
@@ -819,6 +955,16 @@
 
 </div><!-- /page-wrap -->
 
+<!-- Jump nav (mobile) -->
+<nav class="jump-nav" aria-label="Jump to section">
+  <div class="jump-nav-inner">
+    <button class="jump-btn" onclick="jumpTo('sec-videos')"><span class="ji">🎬</span>Videos</button>
+    <button class="jump-btn" onclick="jumpTo('sec-images')"><span class="ji">🖼️</span>Images</button>
+    <button class="jump-btn" onclick="jumpTo('sec-steps')"><span class="ji">📋</span>Steps</button>
+    <button class="jump-btn" onclick="jumpTo('sec-tips')"><span class="ji">💡</span>Tips</button>
+  </div>
+</nav>
+
 <!-- Lightbox -->
 <div class="lightbox" id="lightbox" onclick="closeLightboxOnBg(event)">
   <div class="lightbox-inner" id="lightbox-inner">
@@ -828,7 +974,6 @@
     </div>
     <div class="lightbox-body" id="lb-body"></div>
     <div class="lightbox-footer">
-      <p id="lb-note"></p>
       <a id="lb-link" href="#" target="_blank" rel="noopener">Open source page ↗</a>
     </div>
   </div>
@@ -837,19 +982,17 @@
 <script>
   // ── Video toggle ──
   function toggleVideo(id) {
-    const card = document.getElementById(id);
-    card.classList.toggle('open');
+    document.getElementById(id).classList.toggle('open');
   }
 
   // ── Image tabs ──
   const tabIds = ['point-cut', 'curl-by-curl', 'sectioning', 'blunt-vs-point'];
-  function switchTab(id) {
-    tabIds.forEach(t => {
-      document.getElementById('tab-' + t).classList.remove('active');
-    });
+  function switchTab(id, btn) {
+    tabIds.forEach(t => document.getElementById('tab-' + t).classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-' + id).classList.add('active');
-    event.target.classList.add('active');
+    // btn may be the element or come from onclick attribute
+    (btn || event.currentTarget || event.target).classList.add('active');
   }
 
   // ── Tips accordion ──
@@ -857,32 +1000,47 @@
     document.getElementById(id).classList.toggle('open');
   }
 
+  // ── Jump nav ──
+  function jumpTo(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const offset = el.getBoundingClientRect().top + window.scrollY - 12;
+    window.scrollTo({ top: offset, behavior: 'smooth' });
+  }
+
   // ── Lightbox ──
-  let lbData = {};
   function openLightbox(id, title, imgSrc, pageUrl) {
-    lbData = { id, title, imgSrc, pageUrl };
     document.getElementById('lb-title').textContent = title;
     const body = document.getElementById('lb-body');
     if (imgSrc) {
-      body.innerHTML = '<img src="' + imgSrc + '" alt="' + title + '" onerror="this.style.display=\'none\';document.getElementById(\'lb-fallback\').style.display=\'block\'" /><div id="lb-fallback" class="lightbox-msg" style="display:none"><p>Image could not be loaded directly — click "Open source page" below to view on the original site.</p></div>';
+      body.innerHTML = '<img src="' + imgSrc + '" alt="' + title.replace(/"/g, '&quot;') + '" onerror="this.style.display=\'none\';document.getElementById(\'lb-fallback\').style.display=\'flex\'" />'
+        + '<div id="lb-fallback" class="lightbox-msg" style="display:none"><p>Image could not be loaded directly.</p><p style="margin-top:.5rem">Tap <strong>Open source page</strong> below to view it on the original site.</p></div>';
     } else {
-      body.innerHTML = '<div class="lightbox-msg"><p>This reference contains multiple images embedded in the source page.</p><p style="margin-top:.5rem">Click <strong>"Open source page"</strong> below to view the full visual reference on the original site.</p></div>';
+      body.innerHTML = '<div class="lightbox-msg"><p>This reference contains multiple images embedded in the source page.</p><p style="margin-top:.5rem">Tap <strong>Open source page</strong> below to view the full visual reference.</p></div>';
     }
-    const link = document.getElementById('lb-link');
-    link.href = pageUrl;
-    document.getElementById('lb-note').textContent = '';
+    document.getElementById('lb-link').href = pageUrl;
     document.getElementById('lightbox').classList.add('open');
+    document.body.classList.add('lb-open');
   }
   function closeLightbox() {
     document.getElementById('lightbox').classList.remove('open');
+    document.body.classList.remove('lb-open');
   }
   function closeLightboxOnBg(e) {
     if (e.target === document.getElementById('lightbox')) closeLightbox();
   }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
-  // Auto-open primary video on load
-  window.addEventListener('DOMContentLoaded', () => {
+  // Fix tab buttons — pass element explicitly so switchTab doesn't rely on implicit event global
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('onclick').match(/switchTab\('([^']+)'\)/)[1];
+        switchTab(id, btn);
+      });
+    });
+
+    // Auto-open primary video
     document.getElementById('vc-primary').classList.add('open');
   });
 </script>
