@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Curly/Wavy Men's Home Trim — Interactive Guide</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #23273a;
+      --border: #2e3347;
+      --accent: #6c8ef5;
+      --accent2: #a78bfa;
+      --text: #e2e8f0;
+      --muted: #8892a4;
+      --green: #34d399;
+      --yellow: #fbbf24;
+      --red: #f87171;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── Layout ── */
+    .page-wrap { max-width: 1000px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 3rem 1rem 2rem;
+      background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2.5rem;
+    }
+    .hero h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+    .hero h1 span { color: var(--accent); }
+    .hero p { color: var(--muted); margin-top: .6rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .badge {
+      display: inline-block;
+      background: #1e2a4a;
+      color: var(--accent);
+      border: 1px solid #334180;
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 600;
+      padding: .25rem .75rem;
+      margin-bottom: 1rem;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    /* ── Section titles ── */
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: 1.25rem;
+    }
+    .section-title .icon { font-size: 1.3rem; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .card + .card { margin-top: 1.25rem; }
+
+    /* ── Video section ── */
+    .video-grid { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    .video-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+
+    .video-header {
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: flex-start;
+      gap: .75rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .video-header:hover { background: var(--surface2); }
+
+    .video-tag {
+      flex-shrink: 0;
+      font-size: .7rem;
+      font-weight: 700;
+      padding: .2rem .6rem;
+      border-radius: 999px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .tag-primary { background: #1e3a5f; color: #60a5fa; border: 1px solid #1e4080; }
+    .tag-supp    { background: #1e3a2e; color: #34d399; border: 1px solid #1e4038; }
+
+    .video-meta { flex: 1; }
+    .video-meta h3 { font-size: .95rem; font-weight: 600; }
+    .video-meta p  { font-size: .82rem; color: var(--muted); margin-top: .2rem; }
+
+    .expand-icon {
+      flex-shrink: 0;
+      color: var(--muted);
+      font-size: 1.2rem;
+      transition: transform .25s;
+    }
+    .video-card.open .expand-icon { transform: rotate(180deg); }
+
+    .video-embed-wrap {
+      display: none;
+      padding: 0 1.25rem 1.25rem;
+    }
+    .video-card.open .video-embed-wrap { display: block; }
+
+    .video-embed {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .video-embed iframe {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: none;
+    }
+    .video-note {
+      font-size: .8rem;
+      color: var(--muted);
+      margin-top: .75rem;
+      background: var(--surface2);
+      border-radius: 8px;
+      padding: .6rem .9rem;
+      border-left: 3px solid var(--accent);
+    }
+
+    /* ── Chapters ── */
+    .chapters { padding: .75rem 1.25rem 1rem; border-top: 1px solid var(--border); }
+    .chapters h4 { font-size: .8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .6rem; }
+    .chapter-list { display: flex; flex-direction: column; gap: .35rem; }
+    .chapter-item {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-size: .83rem;
+    }
+    .chapter-item .ts {
+      flex-shrink: 0;
+      font-size: .7rem;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      width: 3rem;
+    }
+    .relevance-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .high   { background: var(--green); }
+    .medium { background: var(--yellow); }
+    .low    { background: var(--muted); }
+
+    /* ── Tabs ── */
+    .tab-nav {
+      display: flex;
+      gap: .25rem;
+      padding: 1rem 1.25rem 0;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: .85rem;
+      font-weight: 600;
+      padding: .5rem .9rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: color .15s, border-color .15s;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .tab-content { padding: 1.25rem; display: none; }
+    .tab-content.active { display: block; }
+
+    /* ── Reference images ── */
+    .img-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+
+    .img-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color .2s, transform .15s;
+    }
+    .img-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+    .img-card .thumb {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      background: var(--surface);
+      display: block;
+    }
+    .img-card .img-fallback {
+      width: 100%;
+      aspect-ratio: 4/3;
+      background: linear-gradient(135deg, var(--surface) 0%, #1e2234 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+      color: var(--muted);
+      font-size: .75rem;
+      text-align: center;
+      padding: .75rem;
+    }
+    .img-card .img-fallback .icon { font-size: 2rem; }
+
+    .img-info { padding: .65rem .8rem; }
+    .img-info .src-name { font-size: .72rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .05em; }
+    .img-info p { font-size: .8rem; color: var(--text); margin-top: .15rem; }
+    .img-info a {
+      font-size: .72rem;
+      color: var(--muted);
+      text-decoration: none;
+      display: inline-block;
+      margin-top: .3rem;
+      word-break: break-all;
+    }
+    .img-info a:hover { color: var(--accent); }
+
+    /* ── Lightbox ── */
+    .lightbox {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.88);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox-inner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      max-width: 800px;
+      width: 100%;
+      overflow: hidden;
+    }
+    .lightbox-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .lightbox-header h3 { font-size: .95rem; font-weight: 600; }
+    .lightbox-close {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .lightbox-close:hover { color: var(--text); }
+    .lightbox-body { padding: 1rem; }
+    .lightbox-body img {
+      width: 100%;
+      max-height: 60vh;
+      object-fit: contain;
+      border-radius: 8px;
+      display: block;
+      background: #0a0d14;
+    }
+    .lightbox-body .lightbox-msg {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+    }
+    .lightbox-footer {
+      padding: .75rem 1rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+    .lightbox-footer p { font-size: .82rem; color: var(--muted); }
+    .lightbox-footer a {
+      font-size: .82rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .lightbox-footer a:hover { text-decoration: underline; }
+
+    /* ── Tips accordion ── */
+    .tip-list { display: flex; flex-direction: column; gap: .5rem; }
+
+    .tip-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .tip-toggle {
+      width: 100%;
+      background: var(--surface2);
+      border: none;
+      color: var(--text);
+      font-size: .88rem;
+      font-weight: 600;
+      padding: .8rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      cursor: pointer;
+      text-align: left;
+    }
+    .tip-toggle:hover { background: #2a2f45; }
+    .tip-toggle .tip-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .tip-toggle .tip-caret { margin-left: auto; color: var(--muted); transition: transform .25s; }
+    .tip-item.open .tip-caret { transform: rotate(180deg); }
+    .tip-body { display: none; padding: .9rem 1rem 1rem; font-size: .87rem; color: var(--muted); border-top: 1px solid var(--border); }
+    .tip-item.open .tip-body { display: block; }
+    .tip-body p + p { margin-top: .5rem; }
+    .tip-body strong { color: var(--text); }
+    .tip-body ul { margin-top: .4rem; padding-left: 1.2rem; }
+    .tip-body li { margin-top: .3rem; }
+
+    /* ── Callout ── */
+    .callout {
+      display: flex;
+      gap: .75rem;
+      padding: .9rem 1rem;
+      border-radius: 10px;
+      border: 1px solid;
+      margin-bottom: 1rem;
+    }
+    .callout-warn { background: #1e1700; border-color: #5a4200; }
+    .callout-info { background: #0d1e3a; border-color: #1a3860; }
+    .callout .ci { font-size: 1.2rem; flex-shrink: 0; }
+    .callout p { font-size: .84rem; line-height: 1.55; }
+    .callout p strong { color: var(--text); }
+
+    /* ── Step list ── */
+    .steps { display: flex; flex-direction: column; gap: 1rem; }
+    .step {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    .step-num {
+      flex-shrink: 0;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      font-size: .85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .step-body h4 { font-size: .9rem; font-weight: 700; }
+    .step-body p  { font-size: .84rem; color: var(--muted); margin-top: .2rem; }
+
+    /* ── Legend ── */
+    .legend {
+      display: flex;
+      gap: 1rem;
+      font-size: .78rem;
+      color: var(--muted);
+      margin-bottom: .75rem;
+      flex-wrap: wrap;
+    }
+    .legend span { display: flex; align-items: center; gap: .3rem; }
+    .legend-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+
+    /* ── Section spacing ── */
+    .section { margin-bottom: 2.5rem; }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 1.5rem; }
+      .img-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="badge">Interactive Cutting Guide</div>
+  <h1>Curly/Wavy Men's <span>Home Trim</span></h1>
+  <p>Scissors-only • 2b/2c hair • Conservative cleanup • Step-by-step with embedded videos &amp; reference images</p>
+</div>
+
+<div class="page-wrap">
+
+  <!-- ── VIDEOS ── -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🎬</span> Tutorial Videos</div>
+
+    <!-- Primary -->
+    <div class="video-card" id="vc-primary">
+      <div class="video-header" onclick="toggleVideo('vc-primary')">
+        <span class="video-tag tag-primary">Primary Pick</span>
+        <div class="video-meta">
+          <h3>How To Cut CURLY Hair | Men's Scissor Cut | Step by Step</h3>
+          <p>The One Minute Barber (Michael Holm) · Scissors-only · ~11–14 min</p>
+        </div>
+        <span class="expand-icon">▾</span>
+      </div>
+      <div class="video-embed-wrap">
+        <div class="video-embed">
+          <iframe
+            src="https://www.youtube-nocookie.com/embed/A_AnH9ODoQo"
+            title="How To Cut CURLY Hair | Men's Scissor Cut | Step by Step"
+            allowfullscreen
+            loading="lazy"
+          ></iframe>
+        </div>
+        <p class="video-note">
+          ✂️ <strong>Scissors-only, men's, curl-specific.</strong> Best for: guide-following discipline,
+          scissor-over-comb on sides, sequenced back→sides→top→fringe workflow.
+          Does <em>not</em> cover dry cutting, vertical point-cutting, or curl-by-curl perimeter — see supplementary video and tips below.
+        </p>
+      </div>
+      <div class="chapters">
+        <h4>Most relevant chapters</h4>
+        <div class="legend">
+          <span><span class="legend-dot high"></span> High relevance</span>
+          <span><span class="legend-dot medium"></span> Watch if time allows</span>
+          <span><span class="legend-dot low"></span> Optional</span>
+        </div>
+        <div class="chapter-list">
+          <div class="chapter-item"><span class="ts">0:00</span><span class="relevance-dot medium"></span> Intro / overview</div>
+          <div class="chapter-item"><span class="ts">~1:30</span><span class="relevance-dot high"></span> Follow a guide / cut in a pattern — core length-setting discipline</div>
+          <div class="chapter-item"><span class="ts">~4:00</span><span class="relevance-dot high"></span> Scissor-over-comb on curly sides — best technique for ear-area bulk</div>
+          <div class="chapter-item"><span class="ts">~7:00</span><span class="relevance-dot medium"></span> Back and sides on longer curly hair</div>
+          <div class="chapter-item"><span class="ts">~9:00</span><span class="relevance-dot high"></span> Top of longer curly hair — keep cuts minimal here</div>
+          <div class="chapter-item"><span class="ts">~11:00</span><span class="relevance-dot high"></span> Long curly fringe — directly applies to middle-part shape</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Supplementary 1 -->
+    <div class="video-card" id="vc-supp1">
+      <div class="video-header" onclick="toggleVideo('vc-supp1')">
+        <span class="video-tag tag-supp">Supplementary</span>
+        <div class="video-meta">
+          <h3>Men's Medium Length Haircut for Wavy Hair</h3>
+          <p>Maksim Nikitochkin · Scissors-only · ~5–9 min</p>
+        </div>
+        <span class="expand-icon">▾</span>
+      </div>
+      <div class="video-embed-wrap">
+        <div class="video-embed">
+          <iframe
+            src="https://www.youtube-nocookie.com/embed/sziAQcXydxM"
+            title="Men's Medium Length Haircut for Wavy Hair"
+            allowfullscreen
+            loading="lazy"
+          ></iframe>
+        </div>
+        <p class="video-note">
+          Good model for <strong>wavy/thin hair</strong> specifically.
+          Confirmed scissors-only, no clippers. Less curl-focused than primary pick — best watched for scheme-based scissor work and texture.
+        </p>
+      </div>
+    </div>
+
+    <!-- Supplementary 2 -->
+    <div class="video-card" id="vc-supp2">
+      <div class="video-header" onclick="toggleVideo('vc-supp2')">
+        <span class="video-tag tag-supp">Supplementary</span>
+        <div class="video-meta">
+          <h3>Middle Length Men's Haircut for Wavy Hair Tutorial</h3>
+          <p>Maksim Nikitochkin · Scheme-based scissor work</p>
+        </div>
+        <span class="expand-icon">▾</span>
+      </div>
+      <div class="video-embed-wrap">
+        <div class="video-embed">
+          <iframe
+            src="https://www.youtube-nocookie.com/embed/CaYnY32P4tQ"
+            title="Middle Length Men's Haircut for Wavy Hair Tutorial"
+            allowfullscreen
+            loading="lazy"
+          ></iframe>
+        </div>
+        <p class="video-note">
+          Similar scheme-based scissor work to the first Nikitochkin clip.
+          Does not explicitly confirm no-clippers — verify before relying on it.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── REFERENCE IMAGES ── -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🖼️</span> Reference Images</div>
+
+    <div class="card">
+      <div class="tab-nav" id="img-tabs">
+        <button class="tab-btn active" onclick="switchTab('point-cut')">Point-Cutting</button>
+        <button class="tab-btn" onclick="switchTab('curl-by-curl')">Curl-by-Curl</button>
+        <button class="tab-btn" onclick="switchTab('sectioning')">Sectioning</button>
+        <button class="tab-btn" onclick="switchTab('blunt-vs-point')">Blunt vs. Point</button>
+      </div>
+
+      <!-- Tab: Point-cutting -->
+      <div class="tab-content active" id="tab-point-cut">
+        <div class="callout callout-info">
+          <span class="ci">✂️</span>
+          <p><strong>Point-cutting (notching):</strong> Scissors held <em>vertically</em> (parallel to the hair strand), snipping small wedges into the ends rather than cutting straight across. Go lightest on tightest (2c) curls — "the ends need friends."</p>
+        </div>
+        <div class="img-grid">
+          <div class="img-card" onclick="openLightbox('joewell-img', 'Joewell — Chop Cut / Point Cut Diagram', 'https://www.joewell.co.jp/eng/images/manual_chop-cut_01.jpg', 'https://www.joewell.co.jp/eng/manual/chop-cut.html')">
+            <div class="img-fallback">
+              <span class="icon">✂️</span>
+              <span>Joewell Point-Cut Diagram<br/><em>Click to load</em></span>
+            </div>
+            <div class="img-info">
+              <div class="src-name">Joewell</div>
+              <p>Chop Cut / Point Cut diagram — scissors inserted vertically creating jagged, textured ends</p>
+              <a href="https://www.joewell.co.jp/eng/manual/chop-cut.html" target="_blank" rel="noopener">joewell.co.jp/eng/manual/chop-cut.html</a>
+            </div>
+          </div>
+          <div class="img-card" onclick="openLightbox('samvilla-pt', 'Sam Villa — Point Cutting Technique', null, 'https://www.samvilla.com/blogs/hair-tutorials/how-to-point-cut-hair')">
+            <div class="img-fallback">
+              <span class="icon">💈</span>
+              <span>Sam Villa<br/>Point-Cut Entry Angle</span>
+            </div>
+            <div class="img-info">
+              <div class="src-name">Sam Villa</div>
+              <p>Vertical/diagonal point-cut entry angle; includes "ends need friends" curly-hair warning</p>
+              <a href="https://www.samvilla.com/blogs/hair-tutorials/how-to-point-cut-hair" target="_blank" rel="noopener">samvilla.com — Point Cutting Hair</a>
+            </div>
+          </div>
+          <div class="img-card" onclick="openLightbox('lsb-pt', 'London School of Barbering — Point Cutting', null, 'https://www.londonschoolofbarbering.com/point-cutting/')">
+            <div class="img-fallback">
+              <span class="icon">🏫</span>
+              <span>London School of Barbering<br/>Vertical Scissor Position</span>
+            </div>
+            <div class="img-info">
+              <div class="src-name">London School of Barbering</div>
+              <p>Educator photos showing vertical scissor-into-ends position</p>
+              <a href="https://www.londonschoolofbarbering.com/point-cutting/" target="_blank" rel="noopener">londonschoolofbarbering.com</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Curl-by-curl -->
+      <div class="tab-content" id="tab-curl-by-curl">
+        <div class="callout callout-info">
+          <span class="ci">🌀</span>
+          <p><strong>Curl-by-curl perimeter:</strong> Take one curl/clump at a time, cut in the natural "C" shape of the curl, snipping at the point where the curl loses its pattern. Avoids frizz at the ends.</p>
+        </div>
+        <div class="img-grid">
+          <div class="img-card" onclick="openLightbox('samvilla-curl', 'Sam Villa — Texturize & Cut Curly Hair', null, 'https://www.samvilla.com/blogs/hair-tutorials/curl-cutting')">
+            <div class="img-fallback">
+              <span class="icon">🌀</span>
+              <span>Sam Villa<br/>Curl-by-Curl Technique</span>
+            </div>
+            <div class="img-info">
+              <div class="src-name">Sam Villa</div>
+              <p>How to Texturize &amp; Cut Curly Hair — shears curving around the curl in a "C" motion, curl by curl</p>
+              <a href="https://www.samvilla.com/blogs/hair-tutorials/curl-cutting" target="_blank" rel="noopener">samvilla.com — Curl Cutting</a>
+            </div>
+          </div>
+          <div class="img-card" onclick="openLightbox('arc-curl', 'ARC Scissors — Curly Cutting 101', null, 'https://arcscissors.com/blogs/haircut-tutorials/curly-cutting-101-with-a-curl-expert')">
+            <div class="img-fallback">
+              <span class="icon">✂️</span>
+              <span>ARC Scissors<br/>Curly Cutting 101</span>
+            </div>
+            <div class="img-info">
+              <div class="src-name">ARC Scissors</div>
+              <p>Demo by Evan Joseph (@evanjosephcurls) — cut each curl in the larger "C" curve to maintain pattern and avoid frizz</p>
+              <a href="https://arcscissors.com/blogs/haircut-tutorials/curly-cutting-101-with-a-curl-expert" target="_blank" rel="noopener">arcscissors.com — Curly Cutting 101</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Sectioning -->
+      <div class="tab-content" id="tab-sectioning">
+        <div class="callout callout-info">
+          <span class="ci">📐</span>
+          <p><strong>Sectioning:</strong> Clip the top away first, work back-to-sides-to-top. Small sections give you control and prevent over-cutting in any one area.</p>
+        </div>
+        <div class="img-grid">
+          <div class="img-card" onclick="openLightbox('hairfinder-sec', 'Hairfinder — 7-Section Parting', null, 'https://www.hairfinder.com/techniques/sectioninghair.htm')">
+            <div class="img-fallback">
+              <span class="icon">📐</span>
+              <span>Hairfinder<br/>7-Section Parting</span>
+            </div>
+            <div class="img-info">
+              <div class="src-name">Hairfinder</div>
+              <p>Photos of scalp divided into 7 clipped sections — useful for curly hair management</p>
+              <a href="https://www.hairfinder.com/techniques/sectioninghair.htm" target="_blank" rel="noopener">hairfinder.com — Sectioning Hair</a>
+            </div>
+          </div>
+          <div class="img-card" onclick="openLightbox('wahl-zones', 'Wahl — Sections of the Head', null, 'https://wahlusa.com/how-to/haircutting/haircuts-101/sections-head')">
+            <div class="img-fallback">
+              <span class="icon">🗺️</span>
+              <span>Wahl USA<br/>Head Zones Diagram</span>
+            </div>
+            <div class="img-info">
+              <div class="src-name">Wahl USA</div>
+              <p>Head-diagram infographic of 4 key cutting zones, men's-cut oriented</p>
+              <a href="https://wahlusa.com/how-to/haircutting/haircuts-101/sections-head" target="_blank" rel="noopener">wahlusa.com — Sections of the Head</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Blunt vs. Point -->
+      <div class="tab-content" id="tab-blunt-vs-point">
+        <div class="callout callout-warn">
+          <span class="ci">⚠️</span>
+          <p><strong>2c curl warning:</strong> On tighter curls, point-cutting removes weight from the ends, causing them to expand and frizz. Sam Villa's "Weave &amp; Blunt" technique — weave into the hair, then close your shear where you want to take weight — keeps the ends blunter and preserves curl formation.</p>
+        </div>
+        <div class="img-grid">
+          <div class="img-card" onclick="openLightbox('jatai-bvp', 'Jatai Academy — Blunt vs. Point Cut', null, 'https://www.jatai.net/jataiacademy/blunt-cutting-vs-point-cutting-a-technical-deep-dive/')">
+            <div class="img-fallback">
+              <span class="icon">📊</span>
+              <span>Jatai Academy<br/>Blunt vs. Point Side-by-Side</span>
+            </div>
+            <div class="img-info">
+              <div class="src-name">Jatai Academy</div>
+              <p>Side-by-side of blunt straight-across edge vs. textured point-cut edge — technical deep dive</p>
+              <a href="https://www.jatai.net/jataiacademy/blunt-cutting-vs-point-cutting-a-technical-deep-dive/" target="_blank" rel="noopener">jatai.net — Blunt vs. Point Deep Dive</a>
+            </div>
+          </div>
+          <div class="img-card" onclick="openLightbox('samvilla-bvp', 'Sam Villa — Blunt vs. Point on Curly Hair', null, 'https://www.samvilla.com/blogs/hair-tutorials/how-to-point-cut-hair')">
+            <div class="img-fallback">
+              <span class="icon">💈</span>
+              <span>Sam Villa<br/>"Ends Need Friends"</span>
+            </div>
+            <div class="img-info">
+              <div class="src-name">Sam Villa</div>
+              <p>Explains why blunt vs. point changes the look on curls; shows "Weave &amp; Blunt" alternative for tighter curls</p>
+              <a href="https://www.samvilla.com/blogs/hair-tutorials/how-to-point-cut-hair" target="_blank" rel="noopener">samvilla.com — Point Cutting Hair</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP-BY-STEP PLAN ── -->
+  <div class="section">
+    <div class="section-title"><span class="icon">📋</span> Step-by-Step Cutting Plan</div>
+    <div class="card" style="padding: 1.25rem;">
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h4>Watch the primary video end-to-end first</h4>
+            <p>Watch The One Minute Barber video above without touching your hair. Then rewatch the scissor-over-comb sides segment and the fringe chapter immediately before you start.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h4>Watch one short dry/curl-by-curl clip</h4>
+            <p>Before cutting, watch the Sam Villa curl-cutting reference (Curl-by-Curl tab above) so you understand cutting in natural curl formation and snipping at the point a curl loses its pattern.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h4>Prep: style hair as normal, detangle, clip the top away</h4>
+            <p>Cut dry if possible — it's lower-risk for a beginner because you see exactly what you're removing. (Experts disagree: Sam Villa prefers wet for control. See Tips below.)</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <h4>Scissor-over-comb on the sides — conservative first pass</h4>
+            <p>Start at the back/sides. Use scissor-over-comb (from primary video mid-section) to remove a small amount of bulk around the ears. Stop and reassess before going further.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <h4>Refine ends with point-cutting where needed</h4>
+            <p>Use the Joewell/Sam Villa point-cut images as your hand-position reference — scissors vertical, tiny wedges, partial closure. Go lightest on 2c clumps or keep those ends blunter.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">6</div>
+          <div class="step-body">
+            <h4>Fringe / middle-part front last</h4>
+            <p>Cut the fringe longer than your target — curl spring will lift it. Follow the fringe chapter (~11:00) of the primary video.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TIPS ACCORDION ── -->
+  <div class="section">
+    <div class="section-title"><span class="icon">💡</span> Tips, Caveats &amp; Benchmarks</div>
+    <div class="tip-list">
+
+      <div class="tip-item" id="tip-wet-dry">
+        <button class="tip-toggle" onclick="toggleTip('tip-wet-dry')">
+          <span class="tip-icon">💧</span>
+          Wet vs. Dry — the expert disagreement
+          <span class="tip-caret">▾</span>
+        </button>
+        <div class="tip-body">
+          <p><strong>Dry (recommended for beginners):</strong> Cut hair in its natural curl formation so you see true shrinkage and shape. You know exactly what you're removing. Lower-risk for a conservative first-timer cleanup.</p>
+          <p><strong>Wet (Sam Villa's view):</strong> "Cut the hair wet. You'll have greater control of the curl and of your sectioning with wet hair, because you'll be reading the natural silhouette. Wet hair will not expand and frizz." — <em>American Salon</em></p>
+          <p>Both are valid professional approaches. For a <strong>conservative home trim</strong>, dry is the safer starting point.</p>
+        </div>
+      </div>
+
+      <div class="tip-item" id="tip-shrinkage">
+        <button class="tip-toggle" onclick="toggleTip('tip-shrinkage')">
+          <span class="tip-icon">🔼</span>
+          Curl spring-up — always cut longer than target
+          <span class="tip-caret">▾</span>
+        </button>
+        <div class="tip-body">
+          <p><strong>Curls spring up when dry.</strong> If you cut to the length you want while wet, the hair will shrink up shorter when dry. Always leave extra length — you can always remove more, you can't put it back.</p>
+          <p>This applies especially to the fringe/middle-part front. Cut it visibly longer than your target; let it dry and re-assess.</p>
+        </div>
+      </div>
+
+      <div class="tip-item" id="tip-2c-ends">
+        <button class="tip-toggle" onclick="toggleTip('tip-2c-ends')">
+          <span class="tip-icon">⚠️</span>
+          2c curl warning — "ends need friends"
+          <span class="tip-caret">▾</span>
+        </button>
+        <div class="tip-body">
+          <p>Sam Villa: <em>"If you point cut naturally curly hair, it will take the weight away from ends, causing the ends of the hair to expand and look frizzy."</em></p>
+          <p><strong>On your 2b (wavier) sections:</strong> you can point-cut fairly freely.</p>
+          <p><strong>On your 2c (tighter) clumps:</strong> keep the ends blunter. Use the "Weave &amp; Blunt" approach — weave into the hair section, then close your shear where you want to take weight away. This removes bulk while preserving the end weight that holds the curl together.</p>
+          <p><strong>Signal to stop point-cutting:</strong> if ends look stringy or frizzy after notching, you've removed too much end weight — stop immediately on those sections.</p>
+        </div>
+      </div>
+
+      <div class="tip-item" id="tip-bulk">
+        <button class="tip-toggle" onclick="toggleTip('tip-bulk')">
+          <span class="tip-icon">📏</span>
+          Reducing side bulk safely
+          <span class="tip-caret">▾</span>
+        </button>
+        <div class="tip-body">
+          <p><strong>Scissor-over-comb</strong> is safer for a beginner than deep internal texturizing. It gradually reduces bulk without committing to a single cut.</p>
+          <ul>
+            <li>Work comb upward through the hair, snipping whatever stands above the comb teeth</li>
+            <li>Start with the comb high (removing less) — you can always lower it for a second pass</li>
+            <li>Check symmetry between passes</li>
+          </ul>
+          <p>If after the first pass the sides still look bulky, take another <em>small</em> scissor-over-comb pass rather than cutting deeper into single sections.</p>
+        </div>
+      </div>
+
+      <div class="tip-item" id="tip-back">
+        <button class="tip-toggle" onclick="toggleTip('tip-back')">
+          <span class="tip-icon">🪞</span>
+          Cutting the back
+          <span class="tip-caret">▾</span>
+        </button>
+        <div class="tip-body">
+          <p>If you can't see the back clearly with a hand mirror, <strong>stop and get a second mirror or a helper</strong> rather than cutting blind. Cutting what you can't see is how you end up with an uneven neckline.</p>
+          <p>Two mirrors at right angles (or a bathroom mirror + a handheld mirror) give you a usable view of the back.</p>
+        </div>
+      </div>
+
+      <div class="tip-item" id="tip-gap">
+        <button class="tip-toggle" onclick="toggleTip('tip-gap')">
+          <span class="tip-icon">📹</span>
+          What the primary video doesn't cover
+          <span class="tip-caret">▾</span>
+        </button>
+        <div class="tip-body">
+          <p>The One Minute Barber video is the best single video for this use case, but it skips:</p>
+          <ul>
+            <li><strong>Dry cutting</strong> — use the Sam Villa curl-cutting reference (Curl-by-Curl tab)</li>
+            <li><strong>Vertical point-cutting / notching motion</strong> — use Joewell diagram and Sam Villa point-cut reference (Point-Cutting tab)</li>
+            <li><strong>Curl-by-curl perimeter cutting</strong> — use ARC Scissors / Sam Villa references (Curl-by-Curl tab)</li>
+          </ul>
+          <p>Most "men's curly scissor cut" videos are barber-on-client demos, not self-cut tutorials. Cutting your own back/crown is materially harder than what these videos show.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightboxOnBg(event)">
+  <div class="lightbox-inner" id="lightbox-inner">
+    <div class="lightbox-header">
+      <h3 id="lb-title">Reference Image</h3>
+      <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    </div>
+    <div class="lightbox-body" id="lb-body"></div>
+    <div class="lightbox-footer">
+      <p id="lb-note"></p>
+      <a id="lb-link" href="#" target="_blank" rel="noopener">Open source page ↗</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Video toggle ──
+  function toggleVideo(id) {
+    const card = document.getElementById(id);
+    card.classList.toggle('open');
+  }
+
+  // ── Image tabs ──
+  const tabIds = ['point-cut', 'curl-by-curl', 'sectioning', 'blunt-vs-point'];
+  function switchTab(id) {
+    tabIds.forEach(t => {
+      document.getElementById('tab-' + t).classList.remove('active');
+    });
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  // ── Tips accordion ──
+  function toggleTip(id) {
+    document.getElementById(id).classList.toggle('open');
+  }
+
+  // ── Lightbox ──
+  let lbData = {};
+  function openLightbox(id, title, imgSrc, pageUrl) {
+    lbData = { id, title, imgSrc, pageUrl };
+    document.getElementById('lb-title').textContent = title;
+    const body = document.getElementById('lb-body');
+    if (imgSrc) {
+      body.innerHTML = '<img src="' + imgSrc + '" alt="' + title + '" onerror="this.style.display=\'none\';document.getElementById(\'lb-fallback\').style.display=\'block\'" /><div id="lb-fallback" class="lightbox-msg" style="display:none"><p>Image could not be loaded directly — click "Open source page" below to view on the original site.</p></div>';
+    } else {
+      body.innerHTML = '<div class="lightbox-msg"><p>This reference contains multiple images embedded in the source page.</p><p style="margin-top:.5rem">Click <strong>"Open source page"</strong> below to view the full visual reference on the original site.</p></div>';
+    }
+    const link = document.getElementById('lb-link');
+    link.href = pageUrl;
+    document.getElementById('lb-note').textContent = '';
+    document.getElementById('lightbox').classList.add('open');
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+  }
+  function closeLightboxOnBg(e) {
+    if (e.target === document.getElementById('lightbox')) closeLightbox();
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+  // Auto-open primary video on load
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('vc-primary').classList.add('open');
+  });
+</script>
+
+</body>
+</html>
