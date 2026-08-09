@@ -5,6 +5,7 @@ import { cacheImage, fetchText } from './download'
 import { imageCacheDir } from './store'
 import { ensureDir, sha1 } from './fsx'
 import { parseDoc } from './howto'
+import { extractImageUrls } from './images'
 
 function decodeEntities(s: string): string {
   return s
@@ -64,6 +65,8 @@ export interface FetchedMeta {
   howTo: Omit<HowToUse, 'source'>
   /** A direct download URL when the page exposes one (e.g. a GitHub release asset). */
   downloadUrl?: string
+  /** Every image referenced by the page, for building a gallery. */
+  images: string[]
 }
 
 /** GitHub repos expose everything we need through the public API. */
@@ -103,13 +106,21 @@ async function fromGitHub(url: string): Promise<FetchedMeta | null> {
 
   const branch = info.default_branch ?? 'main'
   let readme = ''
+  let readmeBase = ''
   for (const name of ['README.md', 'readme.md', 'README.txt']) {
-    const text = await fetchText(`https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${name}`)
+    const rawBase = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/`
+    const text = await fetchText(rawBase + name)
     if (text) {
       readme = text
+      readmeBase = rawBase
       break
     }
   }
+
+  // Screenshots in a README are usually repo-relative, so resolve them against
+  // the raw content host rather than the repo page.
+  const images = readme ? extractImageUrls(readme, readmeBase) : []
+  images.push(`https://opengraph.githubassets.com/1/${owner}/${repo}`)
 
   return {
     meta: {
@@ -122,7 +133,8 @@ async function fromGitHub(url: string): Promise<FetchedMeta | null> {
       tags: []
     },
     howTo: readme ? parseDoc(readme) : { directions: [], tips: [], requirements: [], hotkeys: [] },
-    downloadUrl
+    downloadUrl,
+    images
   }
 }
 
@@ -149,7 +161,8 @@ async function fromOpenGraph(url: string): Promise<FetchedMeta | null> {
       sourceUrl: url,
       tags: []
     },
-    howTo
+    howTo,
+    images: extractImageUrls(html, url)
   }
 }
 

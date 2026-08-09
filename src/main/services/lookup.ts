@@ -11,6 +11,7 @@ import type { LookupCandidate, Mod } from '@shared/types'
 import { cacheImage, fetchText } from './download'
 import { sha1 } from './fsx'
 import { mergeHowTo } from './howto'
+import { collectGallery } from './images'
 import { fetchMetadata, localizeImage } from './metadata'
 import { imageCacheDir } from './store'
 
@@ -225,8 +226,14 @@ export async function applyLookup(mod: Mod, url: string): Promise<Mod> {
     tags: [...new Set([...mod.meta.tags.filter((t) => t !== 'adopted'), ...meta.tags])]
   }
 
-  if (!mod.meta.image && meta.image) {
-    mod.meta.image = await localizeImage(meta.image, mod.id)
+  // Pull every screenshot off the page, keeping only images big enough to be
+  // real (avatars, logos and banners are measured out).
+  const gallery = await collectGallery(found.images, imageCacheDir(), mod.id)
+  if (gallery.length > 0) mod.meta.gallery = gallery
+
+  if (!mod.meta.image) {
+    // Prefer the page's own preview; otherwise the largest screenshot found.
+    mod.meta.image = meta.image ? await localizeImage(meta.image, mod.id) : gallery[0]
   }
 
   // Keep anything we learned from the files on disk; add what the page says.

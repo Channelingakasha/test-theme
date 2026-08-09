@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Mod, ModSetting } from '@shared/types'
+import { Gallery } from '../components/Gallery'
 import { Toggle } from '../components/Toggle'
 import { humanSize, imageSrc, kindIcon, kindLabel, needsInfo, relativeDate } from '../lib/format'
 import { useStore } from '../state'
@@ -174,6 +175,19 @@ export function ModDetail({ mod }: { mod: Mod }): JSX.Element {
               </div>
             )}
           </section>
+
+          {(mod.meta.gallery?.length ?? 0) > 0 && (
+            <section className="panel">
+              <div className="panel-head">
+                <h2>Screenshots</h2>
+                <span className="small muted">
+                  {mod.meta.gallery?.length} image
+                  {mod.meta.gallery?.length === 1 ? '' : 's'} from the mod page
+                </span>
+              </div>
+              <Gallery images={mod.meta.gallery ?? []} />
+            </section>
+          )}
 
           {hasHowTo && (
             <section className="panel">

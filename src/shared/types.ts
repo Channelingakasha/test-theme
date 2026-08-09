@@ -110,6 +110,11 @@ export interface ModMeta {
   description?: string
   /** Preview photo — the image used on the mod's own page, cached locally. */
   image?: string
+  /**
+   * Screenshots pulled from the mod's page, cached locally and ordered
+   * largest first. Shown as a gallery on the mod's info page.
+   */
+  gallery?: string[]
   sourceUrl?: string
   category?: string
   tags: string[]

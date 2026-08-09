@@ -27,9 +27,10 @@ import {
   unwrapSingleRoot
 } from './fsx'
 import { mergeHowTo, readDocs, scanScripts } from './howto'
+import { collectGallery } from './images'
 import { fetchMetadata, localizeImage, nameFromPath } from './metadata'
 import { readSettings } from './modConfig'
-import { getMods, getSettings, removeMod, stagingDir, upsertMod, vaultDir } from './store'
+import { getMods, getSettings, imageCacheDir, removeMod, stagingDir, upsertMod, vaultDir } from './store'
 
 export type ProgressFn = (phase: string, value: number, detail?: string) => void
 
@@ -41,6 +42,7 @@ interface StageRecord {
   files: ClassifiedFile[]
   install: GameInstall
   imageCandidate?: string
+  galleryCandidates: string[]
   hooks: string[]
 }
 
@@ -190,6 +192,8 @@ export async function stageSource(
     files: classified.files.filter((f) => !f.ignored),
     install,
     imageCandidate: meta.image ?? classified.images[0],
+    // Screenshots bundled in the archive plus any found on the mod's page.
+    galleryCandidates: [...classified.images, ...(fetchedMeta?.images ?? [])],
     hooks: scripts.hooks
   })
 
@@ -374,6 +378,7 @@ export async function installStaged(
   const installRoots = [...roots]
   const liveSettings = await readSettings(installRoots)
   const image = await localizeImage(rec.imageCandidate, modId)
+  const gallery = await collectGallery(rec.galleryCandidates, imageCacheDir(), modId)
 
   const containerFiles = installed
     .filter((f) => CONTAINER_EXT.has(path.extname(f.dest).toLowerCase()))
@@ -387,7 +392,11 @@ export async function installStaged(
   const now = Date.now()
   const mod: Mod = {
     id: modId,
-    meta: { ...staged.meta, image },
+    meta: {
+      ...staged.meta,
+      image: image ?? gallery[0],
+      gallery: gallery.length > 0 ? gallery : undefined
+    },
     kind: staged.kind,
     state: 'enabled',
     installRoots,
