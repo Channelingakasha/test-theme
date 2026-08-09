@@ -20,6 +20,7 @@ export function Library(): JSX.Element {
   const total = allMods.length
   const go = useStore((s) => s.go)
   const toggleMod = useStore((s) => s.toggleMod)
+  const startLookup = useStore((s) => s.startLookup)
   const progress = useStore((s) => s.progress)
   const staged = useStore((s) => s.staged)
   const scanGame = useStore((s) => s.scanGame)
@@ -97,6 +98,7 @@ export function Library(): JSX.Element {
               mod={mod}
               onOpen={(id) => go('detail', id)}
               onToggle={toggleMod}
+              onGetInfo={(id) => void startLookup(id)}
             />
           ))}
         </div>

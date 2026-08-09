@@ -1,15 +1,16 @@
 import type { Mod } from '@shared/types'
-import { humanSize, imageSrc, kindIcon, kindLabel } from '../lib/format'
+import { humanSize, imageSrc, kindIcon, kindLabel, needsInfo } from '../lib/format'
 import { Toggle } from './Toggle'
 
 interface Props {
   mod: Mod
   onOpen: (id: string) => void
   onToggle: (id: string, enabled: boolean) => Promise<void>
+  onGetInfo: (id: string) => void
 }
 
 /** Library tile: preview photo, name, and the activate switch. */
-export function ModCard({ mod, onOpen, onToggle }: Props): JSX.Element {
+export function ModCard({ mod, onOpen, onToggle, onGetInfo }: Props): JSX.Element {
   const src = imageSrc(mod.meta.image)
   const variants = mod.options.filter((o) => o.group === 'variant')
 
@@ -54,6 +55,19 @@ export function ModCard({ mod, onOpen, onToggle }: Props): JSX.Element {
           {mod.meta.description?.trim() ||
             (mod.adopted ? 'Imported from your existing install.' : 'No description available.')}
         </div>
+
+        {needsInfo(mod) && (
+          <button
+            className="btn ghost sm"
+            style={{ alignSelf: 'flex-start' }}
+            onClick={(e) => {
+              e.stopPropagation()
+              onGetInfo(mod.id)
+            }}
+          >
+            🔎 Get info
+          </button>
+        )}
 
         <div className="card-foot">
           <span className="card-meta">

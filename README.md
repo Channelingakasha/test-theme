@@ -56,6 +56,16 @@ folder of downloads on your desktop? *Settings → Import existing mods* scans a
 folder and adopts what it finds. Mods already inside the game folder are adopted
 in place — nothing is moved or re-downloaded.
 
+**Get info.** An imported mod arrives knowing nothing but its filename. The
+**Get info** button on its card turns that filename into search terms
+(`LunaOutfit_P.pak` → "Luna Outfit"), searches the web, ranks the results by
+name match and how likely the host is to publish Palworld mods, and reads the
+best pages for their preview photo, description, author and usage notes. You
+pick which result is yours — an automatic guess that's wrong would write bad
+details into your library — and only the fields you're missing get filled in.
+When search comes up empty you can paste the mod's page link instead, which is
+usually what's needed for Nexus Mods since it blocks automated search.
+
 ### How activating and deactivating works
 
 Turning a mod off has to actually stop the game loading it, so PalMod does it
@@ -92,11 +102,12 @@ quicker for testing.
 npm test
 ```
 
-Two suites, both against real files on disk: a unit pass over the parsers
+Three suites, all against real files on disk: a unit pass over the parsers
 (`.pak` index reader, `.utoc` chunk reader, mod-config parsing and write-back,
-readme/Lua hotkey extraction) and an end-to-end pass that builds a fake Palworld
-install and a real zip, then stages, conflict-checks, installs, toggles, switches
-variants, adopts and uninstalls against it.
+readme/Lua hotkey extraction), a pass over the Get-info lookup (search-term
+building, match scoring, result parsing), and an end-to-end pass that builds a
+fake Palworld install and a real zip, then stages, conflict-checks, installs,
+toggles, switches variants, adopts and uninstalls against it.
 
 ## Notes and limits
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { Mod, ModSetting } from '@shared/types'
 import { Toggle } from '../components/Toggle'
-import { humanSize, imageSrc, kindIcon, kindLabel, relativeDate } from '../lib/format'
+import { humanSize, imageSrc, kindIcon, kindLabel, needsInfo, relativeDate } from '../lib/format'
 import { useStore } from '../state'
 
 function SettingRow({
@@ -71,6 +71,7 @@ export function ModDetail({ mod }: { mod: Mod }): JSX.Element {
   const uninstall = useStore((s) => s.uninstall)
   const setModOptions = useStore((s) => s.setModOptions)
   const changeSetting = useStore((s) => s.changeSetting)
+  const startLookup = useStore((s) => s.startLookup)
   const [confirming, setConfirming] = useState(false)
 
   const src = imageSrc(mod.meta.image)
@@ -136,18 +137,27 @@ export function ModDetail({ mod }: { mod: Mod }): JSX.Element {
           <section className="panel">
             <div className="panel-head">
               <h2>About this mod</h2>
-              {mod.meta.sourceUrl && (
-                <button
-                  className="btn ghost sm"
-                  onClick={() => void window.palmod.mods.openUrl(mod.meta.sourceUrl as string)}
-                >
-                  Open mod page ↗
-                </button>
-              )}
+              <div className="row">
+                {needsInfo(mod) && (
+                  <button className="btn sm" onClick={() => void startLookup(mod.id)}>
+                    🔎 Get info
+                  </button>
+                )}
+                {mod.meta.sourceUrl && (
+                  <button
+                    className="btn ghost sm"
+                    onClick={() => void window.palmod.mods.openUrl(mod.meta.sourceUrl as string)}
+                  >
+                    Open mod page ↗
+                  </button>
+                )}
+              </div>
             </div>
             <p className="prose">
               {mod.meta.description?.trim() ||
-                'No description was found for this mod. If you added it from a link, the page may not publish one.'}
+                (mod.adopted
+                  ? 'This mod was imported from your existing install, so all PalMod knows about it is its filename. Use Get info to search the web and fill in the rest.'
+                  : 'No description was found for this mod. If you added it from a link, the page may not publish one.')}
             </p>
             {mod.notes && (
               <p className="prose small muted" style={{ marginTop: 14 }}>

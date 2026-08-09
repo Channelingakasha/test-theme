@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ImportDialog } from './components/ImportDialog'
+import { InfoLookupDialog } from './components/InfoLookupDialog'
 import { StageDialog } from './components/StageDialog'
 import { Toasts } from './components/Toasts'
 import { Library } from './views/Library'
@@ -188,6 +189,7 @@ export default function App(): JSX.Element {
 
       <StageDialog />
       <ImportDialog />
+      <InfoLookupDialog />
       <Toasts />
     </>
   )

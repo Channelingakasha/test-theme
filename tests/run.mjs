@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const root = path.resolve(here, '..')
-const suites = ['smoke.ts', 'e2e.ts']
+const suites = ['smoke.ts', 'lookup.ts', 'e2e.ts']
 
 const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'palmod-tests-'))
 let failed = false

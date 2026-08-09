@@ -4,6 +4,7 @@ import type {
   AdoptCandidate,
   AppSettings,
   GameInstall,
+  LookupCandidate,
   Mod,
   ModSetting,
   StagedMod
@@ -21,6 +22,7 @@ import {
   uninstallMod,
   type InstallChoices
 } from './services/installer'
+import { applyLookup, lookupMod } from './services/lookup'
 import { writeSetting } from './services/modConfig'
 import { getMods, getSettings, setSettings, upsertMod } from './services/store'
 import { exists } from './services/fsx'
@@ -136,6 +138,22 @@ export function registerIpc(getWindow: Send): void {
   ipcMain.handle('mods:refreshSettings', async (_e, id: string): Promise<Mod | null> =>
     refreshModSettings(id)
   )
+
+  ipcMain.handle('mods:lookup', async (_e, id: string): Promise<LookupCandidate[]> => {
+    const mod = (await getMods()).find((m) => m.id === id)
+    if (!mod) throw new Error('Mod not found.')
+    return lookupMod(mod)
+  })
+
+  ipcMain.handle('mods:applyInfo', async (_e, id: string, url: string): Promise<Mod> => {
+    const mod = (await getMods()).find((m) => m.id === id)
+    if (!mod) throw new Error('Mod not found.')
+    if (!/^https?:\/\//i.test(url)) throw new Error('That doesn’t look like a web link.')
+
+    const updated = await applyLookup(mod, url)
+    await upsertMod(updated)
+    return updated
+  })
 
   ipcMain.handle('mods:reveal', async (_e, target: string): Promise<void> => {
     if (await exists(target)) shell.showItemInFolder(target)

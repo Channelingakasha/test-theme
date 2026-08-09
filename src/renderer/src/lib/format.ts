@@ -1,4 +1,12 @@
-import type { ModKind } from '@shared/types'
+import type { Mod, ModKind } from '@shared/types'
+
+/**
+ * True when a mod is missing the details that make its card and page useful.
+ * Imported mods start this way — all we know about them is a filename.
+ */
+export function needsInfo(mod: Mod): boolean {
+  return !mod.meta.description?.trim() || !mod.meta.image
+}
 
 export function humanSize(bytes: number): string {
   if (!bytes) return '0 B'

@@ -215,6 +215,19 @@ export interface AppSettings {
   lastAdoptFolder?: string
 }
 
+/** A possible match for a mod, found by searching the web for its name. */
+export interface LookupCandidate {
+  url: string
+  title: string
+  /** Host the result came from, e.g. "nexusmods.com". */
+  source: string
+  description?: string
+  /** Locally cached preview image, ready for the renderer to display. */
+  image?: string
+  /** 0..1 — how well this result matches the mod we're looking up. */
+  score: number
+}
+
 export interface AdoptCandidate {
   path: string
   suggestedName: string

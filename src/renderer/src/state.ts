@@ -1,5 +1,13 @@
 import { create } from 'zustand'
-import type { AdoptCandidate, AppSettings, GameInstall, Mod, Progress, StagedMod } from '@shared/types'
+import type {
+  AdoptCandidate,
+  AppSettings,
+  GameInstall,
+  LookupCandidate,
+  Mod,
+  Progress,
+  StagedMod
+} from '@shared/types'
 
 export type View = 'library' | 'detail' | 'settings'
 export type Filter = 'all' | 'enabled' | 'disabled' | 'conflicts'
@@ -44,6 +52,13 @@ interface State {
   uninstall: (id: string) => Promise<void>
   setModOptions: (id: string, optionIds: string[]) => Promise<void>
   changeSetting: (id: string, key: string, value: string | number | boolean) => Promise<void>
+
+  lookupModId: string | null
+  lookupResults: LookupCandidate[] | null
+  lookingUp: boolean
+  startLookup: (id: string) => Promise<void>
+  applyLookup: (id: string, url: string) => Promise<void>
+  closeLookup: () => void
 
   scanFolder: (folder: string) => Promise<void>
   scanGame: () => Promise<void>
@@ -205,6 +220,43 @@ export const useStore = create<State>((set, get) => ({
       get().toast(errorText(err), 'error')
     }
   },
+
+  lookupModId: null,
+  lookupResults: null,
+  lookingUp: false,
+
+  startLookup: async (id) => {
+    set({ lookupModId: id, lookupResults: null, lookingUp: true })
+    try {
+      const results = await api().mods.lookup(id)
+      set({ lookupResults: results, lookingUp: false })
+      if (results.length === 0) {
+        get().toast('No matches found online — you can paste the mod page link instead', 'info')
+      }
+    } catch (err) {
+      set({ lookingUp: false, lookupResults: [] })
+      get().toast(errorText(err), 'error')
+    }
+  },
+
+  applyLookup: async (id, url) => {
+    set({ lookingUp: true })
+    try {
+      const updated = await api().mods.applyInfo(id, url)
+      set({
+        mods: get().mods.map((m) => (m.id === id ? updated : m)),
+        lookingUp: false,
+        lookupModId: null,
+        lookupResults: null
+      })
+      get().toast(`Details added for ${updated.meta.name}`, 'success')
+    } catch (err) {
+      set({ lookingUp: false })
+      get().toast(errorText(err), 'error')
+    }
+  },
+
+  closeLookup: () => set({ lookupModId: null, lookupResults: null, lookingUp: false }),
 
   scanFolder: async (folder) => {
     set({ scanning: true })

@@ -3,6 +3,7 @@ import type {
   AdoptCandidate,
   AppSettings,
   GameInstall,
+  LookupCandidate,
   Mod,
   Progress,
   StagedMod
@@ -32,6 +33,10 @@ const api = {
     setSetting: (id: string, key: string, value: string | number | boolean): Promise<Mod | null> =>
       ipcRenderer.invoke('mods:setSetting', id, key, value),
     refreshSettings: (id: string): Promise<Mod | null> => ipcRenderer.invoke('mods:refreshSettings', id),
+    /** Search the web for this mod's page and return ranked matches. */
+    lookup: (id: string): Promise<LookupCandidate[]> => ipcRenderer.invoke('mods:lookup', id),
+    /** Fill in the mod's missing details from a chosen page. */
+    applyInfo: (id: string, url: string): Promise<Mod> => ipcRenderer.invoke('mods:applyInfo', id, url),
     reveal: (target: string): Promise<void> => ipcRenderer.invoke('mods:reveal', target),
     openUrl: (url: string): Promise<void> => ipcRenderer.invoke('mods:openUrl', url)
   },
