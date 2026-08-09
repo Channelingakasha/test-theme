@@ -30,6 +30,7 @@ import {
 } from './services/installer'
 import { targetsForMod } from './services/conflicts'
 import { listTable, rescan, saveRecord, validateRecord } from './services/db'
+import { migrateGalleryEntries } from './services/images'
 import { applyLookup, lookupMod } from './services/lookup'
 import {
   activeProfileId,
@@ -69,6 +70,14 @@ async function requireInstall(): Promise<GameInstall> {
     throw new Error("Palworld wasn't found. Set the game folder in Settings first.")
   }
   return install
+}
+
+/** Upgrade a legacy string[] gallery in place. Returns true if it changed. */
+async function migrateGallery(mod: Mod): Promise<boolean> {
+  const migrated = await migrateGalleryEntries(mod.meta.gallery)
+  if (!migrated) return false
+  mod.meta.gallery = migrated
+  return true
 }
 
 type Send = () => BrowserWindow | null
@@ -121,16 +130,26 @@ export function registerIpc(getWindow: Send): void {
   ipcMain.handle('mods:list', async (): Promise<Mod[]> => {
     const mods = await getMods()
 
-    // Mods added before asset analysis existed get it filled in once, from
-    // their cached index where possible so nothing is re-read from disk.
     for (const mod of mods) {
-      if (mod.targets !== undefined) continue
-      try {
-        mod.targets = await targetsForMod(mod)
-        await upsertMod(mod)
-      } catch {
-        mod.targets = [] // unreadable pak — don't retry on every listing
+      let changed = false
+
+      // Galleries used to be bare paths. Measure them so the viewer knows the
+      // real resolution and can stop upscaling past it.
+      changed = (await migrateGallery(mod)) || changed
+
+      // Mods added before asset analysis existed get it filled in once, from
+      // their cached index where possible so nothing is re-read from disk.
+      if (mod.targets === undefined) {
+        try {
+          mod.targets = await targetsForMod(mod)
+          changed = true
+        } catch {
+          mod.targets = [] // unreadable pak — don't retry on every listing
+          changed = true
+        }
       }
+
+      if (changed) await upsertMod(mod)
     }
 
     return mods

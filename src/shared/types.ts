@@ -107,6 +107,16 @@ export interface HowToUse {
   source?: string
 }
 
+/** A cached screenshot, with the dimensions it was measured at. */
+export interface GalleryImage {
+  /** Absolute path of the cached file. */
+  path: string
+  width: number
+  height: number
+  /** Where it came from, so the full-size original stays reachable. */
+  sourceUrl?: string
+}
+
 export interface ModMeta {
   name: string
   author?: string
@@ -117,8 +127,10 @@ export interface ModMeta {
   /**
    * Screenshots pulled from the mod's page, cached locally and ordered
    * largest first. Shown as a gallery on the mod's info page.
+   *
+   * Older libraries stored bare paths; those are migrated on read.
    */
-  gallery?: string[]
+  gallery?: GalleryImage[]
   sourceUrl?: string
   category?: string
   tags: string[]

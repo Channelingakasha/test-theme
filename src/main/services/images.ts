@@ -10,6 +10,7 @@
  * library.
  */
 import { net } from 'electron'
+import type { GalleryImage } from '@shared/types'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { createHash } from 'node:crypto'
@@ -98,6 +99,27 @@ function absolutize(src: string, baseUrl: string): string | null {
 }
 
 /**
+ * Pick the highest-resolution entry from a srcset.
+ * Entries are not required to be in ascending order, so the width (`800w`) or
+ * density (`2x`) descriptor decides rather than the position in the list.
+ */
+export function largestInSrcset(srcset: string): string | undefined {
+  let best: { url: string; weight: number } | null = null
+
+  for (const part of srcset.split(',')) {
+    const [url, descriptor] = part.trim().split(/\s+/)
+    if (!url) continue
+    const width = descriptor?.match(/^(\d+(?:\.\d+)?)w$/i)
+    const density = descriptor?.match(/^(\d+(?:\.\d+)?)x$/i)
+    // Densities are scaled so a 2x always loses to a real width descriptor.
+    const weight = width ? Number(width[1]) : density ? Number(density[1]) : 1
+    if (!best || weight > best.weight) best = { url, weight }
+  }
+
+  return best?.url
+}
+
+/**
  * Pull every plausible image reference out of a page.
  * Handles lazy-loading attributes and srcset, which most mod sites use, and
  * anchors that link to a full-size image from a thumbnail.
@@ -122,17 +144,13 @@ export function extractImageUrls(html: string, baseUrl: string): string[] {
         break
       }
     }
-    // srcset: take the last (largest) entry.
     const srcset = tag.match(/srcset\s*=\s*["']([^"']+)["']/i)
-    if (srcset) {
-      const last = srcset[1].split(',').pop()?.trim().split(/\s+/)[0]
-      push(last)
-    }
+    if (srcset) push(largestInSrcset(srcset[1]))
   }
 
   // <source srcset> inside <picture>.
   for (const m of html.matchAll(/<source\b[^>]*srcset\s*=\s*["']([^"']+)["'][^>]*>/gi)) {
-    push(m[1].split(',').pop()?.trim().split(/\s+/)[0])
+    push(largestInSrcset(m[1]))
   }
 
   // Anchors linking directly to an image — usually the full-size screenshot.
@@ -160,6 +178,53 @@ export function extractImageUrls(html: string, baseUrl: string): string[] {
   })
 }
 
+/**
+ * Mod pages almost always put a *thumbnail* in the HTML and keep the full-size
+ * image at a sibling URL. Downloading what the page shows gets you a 200px
+ * image that looks awful the moment it's opened, so each URL is turned into a
+ * list of candidates — most-likely-full-size first — and the first one that
+ * downloads and measures bigger wins.
+ */
+export function fullSizeCandidates(url: string): string[] {
+  const out: string[] = []
+  const add = (u: string): void => {
+    if (u && u !== url && !out.includes(u)) out.push(u)
+  }
+
+  // Nexus keeps thumbnails under a parallel /thumbnails/ path.
+  add(url.replace(/\/thumbnails\//i, '/'))
+
+  // Generic size folders.
+  add(url.replace(/\/(thumbs?|small|preview|previews|tn|resized)\//i, '/'))
+
+  // Size suffixes before the extension: -thumb, _small, -150x150, @2x variants.
+  add(url.replace(/([-_.])(thumb(nail)?|small|preview|tiny|mini)(\.[a-z0-9]+)(\?|$)/i, '$4$5'))
+  add(url.replace(/-\d{2,4}x\d{2,4}(\.[a-z0-9]+)(\?|$)/i, '$1$2'))
+
+  // Resizing query strings — drop them entirely to get the original.
+  if (/[?&](w|h|width|height|size|resize|fit|quality|q)=/i.test(url)) {
+    add(url.split('?')[0])
+  }
+
+  // The page's own URL is always the fallback.
+  out.push(url)
+  return out
+}
+
+/**
+ * Key used to recognise the same screenshot arriving at several URLs (thumb
+ * and full size), so only the largest copy is kept.
+ */
+export function imageIdentity(url: string): string {
+  return url
+    .split('?')[0]
+    .toLowerCase()
+    .replace(/\/thumbnails\//g, '/')
+    .replace(/\/(thumbs?|small|preview|previews|tn|resized)\//g, '/')
+    .replace(/([-_.])(thumb(nail)?|small|preview|tiny|mini)(\.[a-z0-9]+)$/, '$4')
+    .replace(/-\d{2,4}x\d{2,4}(\.[a-z0-9]+)$/, '$1')
+}
+
 export interface GalleryOptions {
   /** Stop downloading after this many candidates. */
   maxFetch?: number
@@ -174,78 +239,145 @@ export interface GalleryOptions {
  * and store them in the local cache.
  * Returns absolute paths of the saved files, largest first.
  */
+/**
+ * Bring a legacy gallery (bare file paths) up to the current shape by
+ * measuring each cached file. Returns null when nothing needed changing.
+ */
+export async function migrateGalleryEntries(
+  gallery: unknown
+): Promise<GalleryImage[] | null> {
+  if (!Array.isArray(gallery) || gallery.length === 0) return null
+  if (typeof gallery[0] !== 'string') return null
+
+  const migrated: GalleryImage[] = []
+  for (const entry of gallery as string[]) {
+    try {
+      const size = imageSize(await fs.readFile(entry))
+      if (size) migrated.push({ path: entry, width: size.width, height: size.height })
+    } catch {
+      /* cached file is gone — drop it from the gallery */
+    }
+  }
+
+  return migrated.sort((a, b) => b.width * b.height - a.width * a.height)
+}
+
+interface Fetched {
+  buf: Buffer
+  contentType: string
+}
+
+async function loadImage(url: string): Promise<Fetched | null> {
+  try {
+    if (!/^https?:/i.test(url)) {
+      // A screenshot shipped inside the mod archive.
+      return {
+        buf: await fs.readFile(url),
+        contentType: `image/${path.extname(url).slice(1).toLowerCase() || 'jpeg'}`
+      }
+    }
+
+    const res = await net.fetch(url, {
+      redirect: 'follow',
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36'
+      }
+    })
+    if (!res.ok) return null
+    const contentType = res.headers.get('content-type') ?? ''
+    if (!contentType.startsWith('image/')) return null
+    return { buf: Buffer.from(await res.arrayBuffer()), contentType }
+  } catch {
+    return null
+  }
+}
+
+function extensionFor(contentType: string): string {
+  if (contentType.includes('png')) return '.png'
+  if (contentType.includes('webp')) return '.webp'
+  if (contentType.includes('gif')) return '.gif'
+  return '.jpg'
+}
+
+/**
+ * Download candidate images, keep the ones that look like real screenshots at
+ * a usable resolution, and store them in the local cache.
+ * Returns the saved images with their measured dimensions, largest first.
+ */
 export async function collectGallery(
   urls: string[],
   destDir: string,
   keyPrefix: string,
   opts: GalleryOptions = {}
-): Promise<string[]> {
-  const { maxFetch = 18, maxKeep = 12, minWidth = 200, minHeight = 150 } = opts
+): Promise<GalleryImage[]> {
+  // The floor is deliberately high: anything smaller is a thumbnail, and a
+  // thumbnail in the gallery is worse than no image at all — it looks broken
+  // the moment it's opened full-screen.
+  const { maxFetch = 24, maxKeep = 12, minWidth = 480, minHeight = 270 } = opts
   await ensureDir(destDir)
 
-  const kept: { file: string; area: number }[] = []
-  const seenHashes = new Set<string>()
+  /** Best copy found so far for each distinct screenshot. */
+  const best = new Map<string, { image: GalleryImage; hash: string }>()
   let fetched = 0
 
   for (const url of urls) {
-    if (fetched >= maxFetch || kept.length >= maxKeep) break
-    fetched++
+    if (fetched >= maxFetch || best.size >= maxKeep) break
 
-    let buf: Buffer
-    let contentType: string
-    try {
-      if (/^https?:/i.test(url)) {
-        const res = await net.fetch(url, {
-          redirect: 'follow',
-          headers: {
-            'User-Agent':
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36'
-          }
-        })
-        if (!res.ok) continue
-        contentType = res.headers.get('content-type') ?? ''
-        if (!contentType.startsWith('image/')) continue
-        buf = Buffer.from(await res.arrayBuffer())
-      } else {
-        // A screenshot shipped inside the mod archive.
-        buf = await fs.readFile(url)
-        contentType = `image/${path.extname(url).slice(1).toLowerCase() || 'jpeg'}`
+    const identity = imageIdentity(url)
+    // Try the full-size variants before falling back to what the page showed.
+    for (const candidate of fullSizeCandidates(url)) {
+      if (fetched >= maxFetch) break
+      fetched++
+
+      const loaded = await loadImage(candidate)
+      if (!loaded) continue
+      if (loaded.buf.length < 2048) continue
+
+      const size = imageSize(loaded.buf)
+      if (!size) continue
+      if (size.width < minWidth || size.height < minHeight) continue
+
+      // Drop banners and rails: real screenshots are never this elongated.
+      const ratio = size.width / size.height
+      if (ratio > 5 || ratio < 0.2) continue
+
+      const existing = best.get(identity)
+      if (existing && existing.image.width * existing.image.height >= size.width * size.height) {
+        break // already have this screenshot at equal or better resolution
       }
-    } catch {
-      continue
-    }
 
-    if (buf.length < 2048) continue // too small to be a screenshot
+      const hash = createHash('sha1').update(loaded.buf).digest('hex')
+      const file = path.join(
+        destDir,
+        `${keyPrefix}-gal-${hash.slice(0, 10)}${extensionFor(loaded.contentType)}`
+      )
+      try {
+        await fs.writeFile(file, loaded.buf)
+      } catch {
+        continue // cache write failed — try the next candidate
+      }
 
-    const size = imageSize(buf)
-    if (!size) continue
-    if (size.width < minWidth || size.height < minHeight) continue
-
-    // Drop banners and rails: real screenshots are never this elongated.
-    const ratio = size.width / size.height
-    if (ratio > 5 || ratio < 0.2) continue
-
-    // The same screenshot often appears at several URLs (thumb and full size).
-    const hash = createHash('sha1').update(buf).digest('hex')
-    if (seenHashes.has(hash)) continue
-    seenHashes.add(hash)
-
-    const ext = contentType.includes('png')
-      ? '.png'
-      : contentType.includes('webp')
-        ? '.webp'
-        : contentType.includes('gif')
-          ? '.gif'
-          : '.jpg'
-    const file = path.join(destDir, `${keyPrefix}-gal-${hash.slice(0, 10)}${ext}`)
-    try {
-      await fs.writeFile(file, buf)
-      kept.push({ file, area: size.width * size.height })
-    } catch {
-      /* cache write failed — skip this one */
+      if (existing) await fs.rm(existing.image.path, { force: true })
+      best.set(identity, {
+        hash,
+        image: { path: file, width: size.width, height: size.height, sourceUrl: candidate }
+      })
+      break // got a good copy of this screenshot; move to the next URL
     }
   }
 
+  // Identical bytes reached through unrelated URLs still collapse to one.
+  const byHash = new Map<string, GalleryImage>()
+  for (const { hash, image } of best.values()) {
+    const seen = byHash.get(hash)
+    if (seen) {
+      await fs.rm(image.path, { force: true }).catch(() => undefined)
+      continue
+    }
+    byHash.set(hash, image)
+  }
+
   // Biggest first: the most detailed shot makes the best cover image.
-  return kept.sort((a, b) => b.area - a.area).map((k) => k.file)
+  return [...byHash.values()].sort((a, b) => b.width * b.height - a.width * a.height)
 }

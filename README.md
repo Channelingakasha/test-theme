@@ -55,6 +55,13 @@ where the codename is known: `PinkCat` shows as Cattiva), whether it edits the
 player, weapons, buildings, the interface, or the data tables that control game
 balance.
 
+**Screenshots you can actually look at.** Mod pages serve thumbnails in their
+HTML and keep the full-size image at a sibling URL, so the gallery rewrites each
+URL to its likely full-size form and only falls back to what the page showed.
+Nothing below 480x270 is kept — a thumbnail in a gallery looks broken the moment
+it's opened. The viewer zooms to 800%, pans by dragging, and shows each shot's
+real resolution.
+
 **Character mods with multiple looks.** When a mod ships several mutually
 exclusive versions, they're shown as pickable options. Every option is kept in
 the vault at install time, so switching from one look to another is instant and

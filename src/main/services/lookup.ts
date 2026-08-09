@@ -233,7 +233,7 @@ export async function applyLookup(mod: Mod, url: string): Promise<Mod> {
 
   if (!mod.meta.image) {
     // Prefer the page's own preview; otherwise the largest screenshot found.
-    mod.meta.image = meta.image ? await localizeImage(meta.image, mod.id) : gallery[0]
+    mod.meta.image = meta.image ? await localizeImage(meta.image, mod.id) : gallery[0]?.path
   }
 
   // Keep anything we learned from the files on disk; add what the page says.

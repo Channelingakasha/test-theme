@@ -394,7 +394,7 @@ export async function installStaged(
     id: modId,
     meta: {
       ...staged.meta,
-      image: image ?? gallery[0],
+      image: image ?? gallery[0]?.path,
       gallery: gallery.length > 0 ? gallery : undefined
     },
     kind: staged.kind,

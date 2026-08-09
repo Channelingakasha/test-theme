@@ -1,6 +1,12 @@
 /* Unit tests for gallery extraction and header-based image measurement. */
 import zlib from 'node:zlib'
-import { imageSize, extractImageUrls } from '../src/main/services/images'
+import {
+  imageSize,
+  extractImageUrls,
+  fullSizeCandidates,
+  imageIdentity,
+  largestInSrcset
+} from '../src/main/services/images'
 
 let failures = 0
 function check(name: string, cond: boolean, extra?: unknown): void {
@@ -138,6 +144,76 @@ check(
   'survives a malformed base url',
   extractImageUrls('<img src="/a.png">', 'not a url').length === 0
 )
+
+console.log('\nfull-size url upgrading:')
+const nexusThumb =
+  'https://staticdelivery.nexusmods.com/mods/6063/images/thumbnails/4549/4549-1706-shot.jpeg'
+const nexusFull = fullSizeCandidates(nexusThumb)
+check(
+  'nexus thumbnails resolve to the full image first',
+  nexusFull[0] === 'https://staticdelivery.nexusmods.com/mods/6063/images/4549/4549-1706-shot.jpeg',
+  nexusFull[0]
+)
+check('the original stays as a fallback', nexusFull[nexusFull.length - 1] === nexusThumb)
+
+check(
+  'a /thumbs/ folder is stripped',
+  fullSizeCandidates('https://x.com/img/thumbs/shot.png')[0] === 'https://x.com/img/shot.png',
+  fullSizeCandidates('https://x.com/img/thumbs/shot.png')[0]
+)
+check(
+  'a -thumb suffix is stripped',
+  fullSizeCandidates('https://x.com/shot-thumb.jpg')[0] === 'https://x.com/shot.jpg',
+  fullSizeCandidates('https://x.com/shot-thumb.jpg')[0]
+)
+check(
+  'a -800x600 suffix is stripped',
+  fullSizeCandidates('https://x.com/shot-800x600.jpg')[0] === 'https://x.com/shot.jpg',
+  fullSizeCandidates('https://x.com/shot-800x600.jpg')[0]
+)
+check(
+  'resizing query strings are dropped',
+  fullSizeCandidates('https://x.com/shot.jpg?width=200&quality=60')[0] === 'https://x.com/shot.jpg',
+  fullSizeCandidates('https://x.com/shot.jpg?width=200&quality=60')[0]
+)
+check(
+  'a plain url yields only itself',
+  fullSizeCandidates('https://x.com/shot.jpg').length === 1,
+  fullSizeCandidates('https://x.com/shot.jpg')
+)
+
+console.log('\nthumbnail / full-size pairing:')
+check(
+  'a thumb and its full image share an identity',
+  imageIdentity(nexusThumb) ===
+    imageIdentity('https://staticdelivery.nexusmods.com/mods/6063/images/4549/4549-1706-shot.jpeg')
+)
+check(
+  'different screenshots keep separate identities',
+  imageIdentity('https://x.com/a.jpg') !== imageIdentity('https://x.com/b.jpg')
+)
+check(
+  'query strings do not split an identity',
+  imageIdentity('https://x.com/a.jpg?w=200') === imageIdentity('https://x.com/a.jpg')
+)
+
+console.log('\nsrcset selection:')
+check(
+  'picks the widest entry, not the last',
+  largestInSrcset('/big.jpg 1600w, /small.jpg 400w') === '/big.jpg',
+  largestInSrcset('/big.jpg 1600w, /small.jpg 400w')
+)
+check(
+  'handles density descriptors',
+  largestInSrcset('/a.jpg 1x, /b.jpg 3x') === '/b.jpg',
+  largestInSrcset('/a.jpg 1x, /b.jpg 3x')
+)
+check(
+  'widths beat densities',
+  largestInSrcset('/a.jpg 2x, /b.jpg 1200w') === '/b.jpg',
+  largestInSrcset('/a.jpg 2x, /b.jpg 1200w')
+)
+check('empty srcset is undefined, no throw', largestInSrcset('') === undefined)
 
 console.log('\nmarkdown readme images:')
 const md = `# Mod\n![screenshot](docs/shot1.png)\n![another](https://cdn.example.com/shot2.jpg)\n`
