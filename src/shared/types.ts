@@ -136,10 +136,40 @@ export interface Mod {
   loadOrder: number
   installedAt: number
   updatedAt: number
+  /**
+   * What this mod changes in game, read from the cooked assets in its paks.
+   * Undefined means it hasn't been analysed yet; an empty array means it was
+   * analysed and nothing could be determined (an unreadable or script-only mod).
+   */
+  targets?: ModTarget[]
   /** Set when the mod was adopted from a pre-existing folder rather than installed by us. */
   adopted?: boolean
   sizeBytes: number
   notes?: string
+}
+
+/** The kind of game content a mod changes, derived from its cooked assets. */
+export type ModTargetKind =
+  | 'player'
+  | 'pal'
+  | 'weapon'
+  | 'building'
+  | 'item'
+  | 'ui'
+  | 'data'
+  | 'audio'
+  | 'map'
+  | 'effect'
+  | 'other'
+
+export interface ModTarget {
+  kind: ModTargetKind
+  /** Human-readable name, e.g. "Cattiva (PinkCat)" or "Your player character". */
+  label: string
+  /** How many cooked assets fall under this target. */
+  assetCount: number
+  /** A few example asset paths, for the details view. */
+  examples: string[]
 }
 
 export type ConflictSeverity = 'blocking' | 'warning' | 'info'

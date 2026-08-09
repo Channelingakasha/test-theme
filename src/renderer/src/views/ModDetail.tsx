@@ -2,7 +2,15 @@ import { useState } from 'react'
 import type { Mod, ModSetting } from '@shared/types'
 import { Gallery } from '../components/Gallery'
 import { Toggle } from '../components/Toggle'
-import { humanSize, imageSrc, kindIcon, kindLabel, needsInfo, relativeDate } from '../lib/format'
+import {
+  humanSize,
+  imageSrc,
+  kindIcon,
+  kindLabel,
+  needsInfo,
+  relativeDate,
+  targetIcon
+} from '../lib/format'
 import { useStore } from '../state'
 
 function SettingRow({
@@ -175,6 +183,32 @@ export function ModDetail({ mod }: { mod: Mod }): JSX.Element {
               </div>
             )}
           </section>
+
+          {(mod.targets?.length ?? 0) > 0 && (
+            <section className="panel">
+              <div className="panel-head">
+                <h2>What this mod changes</h2>
+                <span className="small muted">read from the mod's own files</span>
+              </div>
+
+              <div className="stack" style={{ gap: 10 }}>
+                {mod.targets?.map((t) => (
+                  <div key={`${t.kind}-${t.label}`} className="target-row">
+                    <span className="target-icon" aria-hidden>
+                      {targetIcon(t.kind)}
+                    </span>
+                    <span style={{ minWidth: 0, flex: 1 }}>
+                      <div className="setting-name">{t.label}</div>
+                      <div className="setting-hint">
+                        {t.assetCount} file{t.assetCount === 1 ? '' : 's'} ·{' '}
+                        {t.examples[0]?.split('/').slice(-2).join('/')}
+                      </div>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {(mod.meta.gallery?.length ?? 0) > 0 && (
             <section className="panel">

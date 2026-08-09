@@ -1,4 +1,44 @@
-import type { Mod, ModKind } from '@shared/types'
+import type { Mod, ModKind, ModTarget, ModTargetKind } from '@shared/types'
+
+export function targetIcon(kind: ModTargetKind): string {
+  switch (kind) {
+    case 'player':
+      return '🧍'
+    case 'pal':
+      return '🐾'
+    case 'weapon':
+      return '⚔️'
+    case 'building':
+      return '🏠'
+    case 'item':
+      return '🎒'
+    case 'ui':
+      return '🖥️'
+    case 'data':
+      return '📊'
+    case 'audio':
+      return '🔊'
+    case 'map':
+      return '🗺️'
+    case 'effect':
+      return '✨'
+    default:
+      return '📦'
+  }
+}
+
+/** Short badge text for a card, e.g. "Player character" or "3 Pals". */
+export function summarizeTargets(targets: ModTarget[] | undefined): string | null {
+  if (!targets || targets.length === 0) return null
+
+  if (targets.some((t) => t.kind === 'player')) return 'Player character'
+
+  const pals = targets.filter((t) => t.kind === 'pal')
+  if (pals.length === 1) return pals[0].label.replace(/\s*\([^)]*\)$/, '')
+  if (pals.length > 1) return `${pals.length} Pals`
+
+  return targets[0].label
+}
 
 /**
  * True when a mod is missing the details that make its card and page useful.

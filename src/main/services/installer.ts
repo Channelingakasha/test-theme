@@ -28,6 +28,7 @@ import {
 } from './fsx'
 import { mergeHowTo, readDocs, scanScripts } from './howto'
 import { collectGallery } from './images'
+import { classifyAssets } from './targets'
 import { fetchMetadata, localizeImage, nameFromPath } from './metadata'
 import { readSettings } from './modConfig'
 import { getMods, getSettings, imageCacheDir, removeMod, stagingDir, upsertMod, vaultDir } from './store'
@@ -385,9 +386,8 @@ export async function installStaged(
     .map((f) => f.dest)
   const scripts = await scanScripts(installRoots)
 
-  await saveModIndex(
-    await buildIndex(modId, containerFiles, scripts.hooks, scripts.hotkeys.map((h) => h.key))
-  )
+  const index = await buildIndex(modId, containerFiles, scripts.hooks, scripts.hotkeys.map((h) => h.key))
+  await saveModIndex(index)
 
   const now = Date.now()
   const mod: Mod = {
@@ -405,6 +405,7 @@ export async function installStaged(
     selectedOptionIds: choices.selectedOptionIds,
     settings: liveSettings.length ? liveSettings : staged.settings,
     howTo: mergeHowTo([staged.howTo, scripts], liveSettings, staged.meta.sourceUrl),
+    targets: classifyAssets(index.assets),
     loadOrder: choices.loadOrderPrefix ?? 100,
     installedAt: now,
     updatedAt: now,

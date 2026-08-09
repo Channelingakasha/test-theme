@@ -1,5 +1,5 @@
 import type { Mod } from '@shared/types'
-import { humanSize, imageSrc, kindIcon, kindLabel, needsInfo } from '../lib/format'
+import { humanSize, imageSrc, kindIcon, kindLabel, needsInfo, summarizeTargets } from '../lib/format'
 import { Toggle } from './Toggle'
 
 interface Props {
@@ -13,6 +13,7 @@ interface Props {
 export function ModCard({ mod, onOpen, onToggle, onGetInfo }: Props): JSX.Element {
   const src = imageSrc(mod.meta.image)
   const variants = mod.options.filter((o) => o.group === 'variant')
+  const affects = summarizeTargets(mod.targets)
 
   return (
     <article
@@ -46,6 +47,7 @@ export function ModCard({ mod, onOpen, onToggle, onGetInfo }: Props): JSX.Elemen
           <span className="badge">{kindLabel(mod.kind)}</span>
           {mod.state === 'disabled' && <span className="badge warn">Off</span>}
           {variants.length > 0 && <span className="badge accent">{variants.length} options</span>}
+          {affects && <span className="badge accent">{affects}</span>}
         </div>
       </div>
 

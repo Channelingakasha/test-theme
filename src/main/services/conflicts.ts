@@ -1,8 +1,9 @@
 import path from 'node:path'
-import type { Conflict, GameInstall, Mod, ModKind } from '@shared/types'
+import type { Conflict, GameInstall, Mod, ModKind, ModTarget } from '@shared/types'
 import { exists, readJsonIfExists, writeJson } from './fsx'
 import { dataDir } from './store'
 import { indexContainers } from './pak'
+import { classifyAssets } from './targets'
 
 /**
  * Per-mod fingerprint used for conflict checks. Computed once at install time
@@ -40,6 +41,26 @@ export async function buildIndex(
 ): Promise<ModIndex> {
   const { assets, chunkIds, readable } = await indexContainers(containerFiles)
   return { modId, assets, chunkIds, hooks, hotkeys, readable }
+}
+
+/**
+ * What a mod changes in game, from its cooked asset paths. Uses the cached
+ * index when one exists so nothing is re-read from disk.
+ */
+export async function targetsForMod(mod: Mod): Promise<ModTarget[]> {
+  let index = await loadModIndex(mod.id)
+
+  // Mods added before indexing existed, or whose index was lost, get one now.
+  if (!index) {
+    const containers = mod.files
+      .filter((f) => /\.(pak|utoc)$/i.test(f.dest))
+      .map((f) => f.dest)
+    if (containers.length === 0) return []
+    index = await buildIndex(mod.id, containers, [], [])
+    await saveModIndex(index)
+  }
+
+  return classifyAssets(index.assets)
 }
 
 function intersect(a: string[], b: Set<string>, limit = 12): string[] {

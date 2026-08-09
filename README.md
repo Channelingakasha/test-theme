@@ -46,6 +46,14 @@ itself exposes (read out of its own config files and written back when you
 change them), and a **How to use** section with directions, hotkeys, tips and
 requirements.
 
+**Tells you what a mod actually changes.** The same pak index used for conflict
+detection also reveals which game content a mod touches, so a card can say
+"Player character" or "2 Pals" instead of leaving you to guess from
+`pakchunk99_P.pak`. The info page breaks it down — which Pals (by game name
+where the codename is known: `PinkCat` shows as Cattiva), whether it edits the
+player, weapons, buildings, the interface, or the data tables that control game
+balance.
+
 **Character mods with multiple looks.** When a mod ships several mutually
 exclusive versions, they're shown as pickable options. Every option is kept in
 the vault at install time, so switching from one look to another is instant and
@@ -102,7 +110,7 @@ quicker for testing.
 npm test
 ```
 
-Three suites, all against real files on disk: a unit pass over the parsers
+Five suites, all against real files on disk: a unit pass over the parsers
 (`.pak` index reader, `.utoc` chunk reader, mod-config parsing and write-back,
 readme/Lua hotkey extraction), a pass over the Get-info lookup (search-term
 building, match scoring, result parsing), and an end-to-end pass that builds a

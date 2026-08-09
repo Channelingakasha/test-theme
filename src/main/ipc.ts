@@ -22,6 +22,7 @@ import {
   uninstallMod,
   type InstallChoices
 } from './services/installer'
+import { targetsForMod } from './services/conflicts'
 import { applyLookup, lookupMod } from './services/lookup'
 import { writeSetting } from './services/modConfig'
 import { getMods, getSettings, setSettings, upsertMod } from './services/store'
@@ -101,7 +102,23 @@ export function registerIpc(getWindow: Send): void {
   })
 
   // --- library -------------------------------------------------------------
-  ipcMain.handle('mods:list', async (): Promise<Mod[]> => getMods())
+  ipcMain.handle('mods:list', async (): Promise<Mod[]> => {
+    const mods = await getMods()
+
+    // Mods added before asset analysis existed get it filled in once, from
+    // their cached index where possible so nothing is re-read from disk.
+    for (const mod of mods) {
+      if (mod.targets !== undefined) continue
+      try {
+        mod.targets = await targetsForMod(mod)
+        await upsertMod(mod)
+      } catch {
+        mod.targets = [] // unreadable pak — don't retry on every listing
+      }
+    }
+
+    return mods
+  })
 
   ipcMain.handle('mods:setEnabled', async (_e, id: string, enabled: boolean): Promise<Mod> => {
     const install = await requireInstall()

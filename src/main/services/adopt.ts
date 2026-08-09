@@ -9,6 +9,7 @@ import { mergeHowTo, readDocs, scanScripts } from './howto'
 import { nameFromPath } from './metadata'
 import { readSettings } from './modConfig'
 import { getMods, upsertMod } from './store'
+import { classifyAssets } from './targets'
 
 const CONTAINER_EXT = new Set(['.pak', '.ucas', '.utoc', '.sig'])
 
@@ -172,9 +173,8 @@ export async function adoptInPlace(
     const containerFiles = files
       .filter((f) => CONTAINER_EXT.has(path.extname(f.dest).toLowerCase()))
       .map((f) => f.dest)
-    await saveModIndex(
-      await buildIndex(modId, containerFiles, scripts.hooks, scripts.hotkeys.map((h) => h.key))
-    )
+    const index = await buildIndex(modId, containerFiles, scripts.hooks, scripts.hotkeys.map((h) => h.key))
+    await saveModIndex(index)
 
     const now = Date.now()
     const mod: Mod = {
@@ -188,6 +188,7 @@ export async function adoptInPlace(
       selectedOptionIds: [],
       settings,
       howTo: mergeHowTo([docs, scripts], settings),
+      targets: classifyAssets(index.assets),
       loadOrder: 100,
       installedAt: now,
       updatedAt: now,
