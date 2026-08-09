@@ -1,58 +1,187 @@
-# Theme Template
+# PalMod
 
-Quick start and create a new theme by using this template. Follow the below 4 steps:
+A desktop mod manager for Palworld. Give it a link, a zip, a folder or a loose
+file — it works out what kind of mod it is, checks for conflicts with what you
+already have, and puts the files where the game actually reads them.
 
-Refer this [link](https://docs.phcode.dev/api/creating-themes) for detailed theme documentation after following the below steps:
+![built with Electron + React](https://img.shields.io/badge/Electron-33-2b2e3a) ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-2b2e3a)
 
-## step 1
+## What it does
 
-Login with github: https://github.com/login
+**Add mods from anywhere.** Paste a mod page link, drop a `.zip` / `.7z` /
+`.rar` anywhere in the window, pick loose files, or point it at a folder. When
+you give it a link it pulls the mod's title, description and preview photo from
+the page, and grabs the readme so the app can tell you how to use the mod.
 
-## step 2
+**Puts files in the right place, automatically.** Different Palworld mods live
+in completely different folders, and putting one in the wrong place just makes
+it silently not work. PalMod reads the contents and routes each file:
 
-Create a new repository using this template.
-![New extension from template](https://user-images.githubusercontent.com/5336369/223931565-2708e516-a422-4e7b-9d89-9ac48c919c3d.gif)
+| What it finds | Where it goes |
+| --- | --- |
+| `.pak` / `.ucas` / `.utoc` | `Pal/Content/Paks/~mods` |
+| Blueprint mods | `Pal/Content/Paks/LogicMods` |
+| Lua script mods | `Pal/Binaries/Win64/ue4ss/Mods/<Mod>` |
+| Native `.dll` mods | `…/ue4ss/Mods/<Mod>/dlls` |
+| PalSchema JSON mods | `…/ue4ss/Mods/PalSchema/mods/<Mod>` |
+| UE4SS itself | `Pal/Binaries/Win64` |
+| Save data | `%LOCALAPPDATA%/Pal/Saved` |
 
-## step 3
+**Real conflict detection.** Before anything is written, PalMod compares the
+incoming mod against your library and tells you what will actually break:
 
-* Clone your GitHub Repository created from `step 2`. See [this link](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) to learn how to clone a repository from GitHub.
-* Edit `package.json` file in template, make sure to update the following fields accordingly:
+- **File collisions** — two mods writing the same file.
+- **Asset overlap** — it reads the *index inside* `.pak` files and the chunk IDs
+  inside `.utoc` containers, so it can tell you two mods edit the same in-game
+  asset even when their filenames are completely different. That's the conflict
+  that normally shows up as "my mod just doesn't work".
+- **Hotkey and hook clashes** between script mods, parsed out of their Lua.
+- **Missing requirements** — e.g. a script mod when UE4SS isn't installed.
 
-| Field       | Description                                                            |
-|-------------|------------------------------------------------------------------------|
-| `title`     | Replace "Name of the extension" with the actual title of your extension. |
-| `name`      | Change `github-<owner>-<repo>` to your specific package name, formatted as `github-yourusername-reponame`. |
-| `description` | Update to a brief, relevant description of what your extension does.  |
-| `version`   | Start with "0.0.1" or update to reflect your current version following semantic versioning. |
-| `license`   | Confirm "MIT" is suitable or specify another license if necessary.     |
-| `author`    | Replace with your name and a link to your GitHub profile or another URL. |
-| `homepage`  | Set to the URL of your project’s homepage or GitHub repository.        |
-| `engines`   | Ensure compatibility with the required Brackets version, e.g., ">=3.0.0". |
-| `categories`| Update "demo" with relevant categories that fit your extension.         |
-| `keywords`  | Update or append additional keywords that describe your extension.    |
-| `files`     | Ensure this includes all necessary files and folders for your extension. |
+Nothing touches the game folder until you choose how to resolve it.
 
+**Cards, toggles, and a detail page.** Every mod is a card with its preview
+photo and a switch to activate or deactivate it. Opening one shows the
+description, exactly which files it installed and where, any settings the mod
+itself exposes (read out of its own config files and written back when you
+change them), and a **How to use** section with directions, hotkeys, tips and
+requirements.
 
-## step 4
+**Tells you what a mod actually changes.** The same pak index used for conflict
+detection also reveals which game content a mod touches, so a card can say
+"Player character" or "2 Pals" instead of leaving you to guess from
+`pakchunk99_P.pak`. The info page breaks it down — which Pals (by game name
+where the codename is known: `PinkCat` shows as Cattiva), whether it edits the
+player, weapons, buildings, the interface, or the data tables that control game
+balance.
 
-* Go to https://create.phcode.dev .This is a special development centric website of phcode.dev which shows non minified js/css files in the browser developer tools.
-* Open the cloned folder and select `Debug > Load Project As Extension`
+**Screenshots you can actually look at.** Mod pages serve thumbnails in their
+HTML and keep the full-size image at a sibling URL, so the gallery rewrites each
+URL to its likely full-size form and only falls back to what the page showed.
+Nothing below 480x270 is kept — a thumbnail in a gallery looks broken the moment
+it's opened. The viewer zooms to 800%, pans by dragging, and shows each shot's
+real resolution.
 
-![image](https://user-images.githubusercontent.com/5336369/224746152-0416a862-891a-4fe1-b9dd-09add25a6cc0.png)
+**Character mods with multiple looks.** When a mod ships several mutually
+exclusive versions, they're shown as pickable options. Every option is kept in
+the vault at install time, so switching from one look to another is instant and
+doesn't need a re-download.
 
+**Edit tab.** A tabbed data grid over PalMod's own database — Mods, Profiles
+and Settings — with a live raw JSON editor for the selected record. Edits are
+validated as you type and cannot be saved while invalid, since a malformed
+record would break the library on next launch. After a save you're offered a
+full re-scan of the mod folder to reconcile the library with what's actually on
+disk.
 
-* You can now make code changes to your theme and live preview theme changes as you edit your theme css.
+**Profiles.** Named mod loadouts. Save your current setup as a profile, then
+switch between them — applying one enables exactly its mods and disables the
+rest, using the same per-kind logic the toggles use, so the game folder ends up
+genuinely valid rather than just the database.
 
-![theme dev](https://user-images.githubusercontent.com/5336369/222974377-e3c04920-dd2b-4eab-be35-57df403ff249.gif)
-* You can also select `Debug> Reload With Extensions` to test the new code changes.
-* When you are done developing the extension/theme, select `Debug> Unload Project As Extension` to unload the extension/theme.
+**Takes over mods you already have.** Already modded the game by hand, or have a
+folder of downloads on your desktop? *Settings → Import existing mods* scans a
+folder and adopts what it finds. Mods already inside the game folder are adopted
+in place — nothing is moved or re-downloaded.
 
-![image](https://user-images.githubusercontent.com/5336369/224747590-556dff1d-5b29-41c3-88a0-3ce72ab643d0.png)
+**Get info.** An imported mod arrives knowing nothing but its filename. The
+**Get info** button on its card turns that filename into search terms
+(`LunaOutfit_P.pak` → "Luna Outfit"), searches the web, ranks the results by
+name match and how likely the host is to publish Palworld mods, and reads the
+best pages for their preview photo, description, author and usage notes. You
+pick which result is yours — an automatic guess that's wrong would write bad
+details into your library — and only the fields you're missing get filled in.
+When search comes up empty you can paste the mod's page link instead, which is
+usually what's needed for Nexus Mods since it blocks automated search.
 
-# Detailed Documentation
+### How activating and deactivating works
 
-Please go to [https://docs.phcode.dev/api/creating-themes](https://docs.phcode.dev/api/creating-themes) for more documentation/community support links.
+Turning a mod off has to actually stop the game loading it, so PalMod does it
+differently per mod type. Pak content is moved out of the game folder into a
+local vault (Unreal loads anything it finds in `~mods`, so renaming isn't
+enough) and moved straight back when you switch it on. Script mods stay where
+they are and get flipped to `0` in UE4SS's `mods.txt`, which is how UE4SS itself
+expects to be told.
 
-# Publishing your theme to the repository
-Once you have built your theme, you can publish the theme to phcode.dev extension store in a single step directly from this repository.
-Please see publish section in this link for more details: [Publishing extension and themes](https://docs.phcode.dev/api/publishing-extensions)
+Uninstalling removes the mod's files and restores anything it overwrote, as long
+as backups are on (they are by default).
+
+## Running it
+
+Requires [Node.js](https://nodejs.org) 20 or newer.
+
+```bash
+npm install
+npm run dev
+```
+
+To build a Windows installer (`release/`):
+
+```bash
+npm run dist:win
+```
+
+`npm run dist:dir` produces an unpacked build without an installer, which is
+quicker for testing.
+
+## Tests
+
+```bash
+npm test
+```
+
+Six suites, all against real files on disk: a unit pass over the parsers
+(`.pak` index reader, `.utoc` chunk reader, mod-config parsing and write-back,
+readme/Lua hotkey extraction), a pass over the Get-info lookup (search-term
+building, match scoring, result parsing), and an end-to-end pass that builds a
+fake Palworld install and a real zip, then stages, conflict-checks, installs,
+toggles, switches variants, adopts and uninstalls against it.
+
+## The app icon
+
+The mark lives in `build/`:
+
+- `icon-source.svg` — the artwork exactly as supplied, untouched.
+- `icon.svg` — the same paths with a tighter viewBox, so the logo fills the
+  icon square instead of floating in the middle of it.
+- `icon.png` / `icon.ico` — generated. Don't edit these by hand.
+
+```bash
+npm run icons
+```
+
+Rasterises through Electron, so there's no native image library to install.
+
+The design gets its look from a chromatic split — cyan and magenta copies
+offset a few units apart. That offset is about a tenth of a pixel on a 16px
+icon, so a literal render turns into black-on-black mush at taskbar sizes.
+Below 256px the generator scales the offset up to keep roughly a pixel of
+visible fringe; at 256px and above the artwork renders exactly as supplied. Set
+`BOOST_SMALL_SIZES = false` in `make-icons.mjs` for literal output everywhere.
+
+## Notes and limits
+
+- Built for the Windows versions of Palworld (Steam, Game Pass and Epic paths are
+  all auto-detected). The code has no Windows-only calls, but the install paths it
+  targets are the Windows ones.
+- Script, blueprint and PalSchema mods need their framework installed
+  ([UE4SS](https://github.com/UE4SS-RE/RE-UE4SS) / PalSchema). PalMod detects whether it's present and warns you before installing
+  a mod that needs it — it doesn't install UE4SS for you.
+- Some mod hosts (Nexus in particular) put downloads behind a login or a
+  redirect, so a direct paste of a page URL may not be downloadable. Downloading
+  the file yourself and dropping it in works for every host.
+- Pak index reading covers UnrealPak versions 8–11. Encrypted indexes can't be
+  read; when that happens PalMod says so and falls back to filename-level
+  conflict checks rather than guessing.
+
+## Layout
+
+```
+src/
+  main/services/    game detection, download, extraction, classification,
+                    conflicts, pak/utoc readers, install, adopt, config parsing
+  preload/          typed IPC bridge
+  renderer/         React UI (library, mod detail, settings)
+  shared/types.ts   contract shared by both sides
+tests/              unit + end-to-end suites
+```
