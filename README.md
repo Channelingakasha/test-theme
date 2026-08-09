@@ -130,6 +130,28 @@ building, match scoring, result parsing), and an end-to-end pass that builds a
 fake Palworld install and a real zip, then stages, conflict-checks, installs,
 toggles, switches variants, adopts and uninstalls against it.
 
+## The app icon
+
+The mark lives in `build/`:
+
+- `icon-source.svg` — the artwork exactly as supplied, untouched.
+- `icon.svg` — the same paths with a tighter viewBox, so the logo fills the
+  icon square instead of floating in the middle of it.
+- `icon.png` / `icon.ico` — generated. Don't edit these by hand.
+
+```bash
+npm run icons
+```
+
+Rasterises through Electron, so there's no native image library to install.
+
+The design gets its look from a chromatic split — cyan and magenta copies
+offset a few units apart. That offset is about a tenth of a pixel on a 16px
+icon, so a literal render turns into black-on-black mush at taskbar sizes.
+Below 256px the generator scales the offset up to keep roughly a pixel of
+visible fringe; at 256px and above the artwork renders exactly as supplied. Set
+`BOOST_SMALL_SIZES = false` in `make-icons.mjs` for literal output everywhere.
+
 ## Notes and limits
 
 - Built for the Windows versions of Palworld (Steam, Game Pass and Epic paths are
