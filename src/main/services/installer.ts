@@ -584,6 +584,8 @@ export function kindLabel(kind: ModKind): string {
       return 'Native mod'
     case 'ue4ss-core':
       return 'UE4SS loader'
+    case 'palschema':
+      return 'PalSchema mod'
     case 'save':
       return 'Save data'
     default:

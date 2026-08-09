@@ -1,5 +1,6 @@
 import { app, BrowserWindow, dialog, net, protocol, shell } from 'electron'
 import path from 'node:path'
+import { existsSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 import { registerIpc } from './ipc'
 import { ensureDir, rmrf } from './services/fsx'
@@ -32,6 +33,19 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'palimg', privileges: { standard: true, secure: true, supportFetchAPI: true } }
 ])
 
+/**
+ * Window icon. On Windows the executable's icon comes from build/icon.ico at
+ * package time; this is what the taskbar and Linux window managers use.
+ */
+function appIcon(): string | undefined {
+  const candidates = [
+    path.join(process.resourcesPath ?? '', 'build', 'icon.png'),
+    path.join(app.getAppPath(), 'build', 'icon.png'),
+    path.join(__dirname, '../../build/icon.png')
+  ]
+  return candidates.find((p) => existsSync(p))
+}
+
 function registerImageProtocol(): void {
   protocol.handle('palimg', async (request) => {
     // Only ever serve a bare filename out of the image cache.
@@ -55,6 +69,7 @@ function createWindow(): void {
     show: false,
     autoHideMenuBar: true,
     backgroundColor: '#0d0f14',
+    icon: appIcon(),
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       contextIsolation: true,

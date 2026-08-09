@@ -5,8 +5,14 @@ import type {
   GameInstall,
   LookupCandidate,
   Mod,
+  Profile,
   Progress,
-  StagedMod
+  RescanResult,
+  StagedMod,
+  TableName,
+  TableRow,
+  ValidationResult,
+  ApplyResult
 } from '@shared/types'
 
 export interface InstallChoices {
@@ -55,6 +61,25 @@ const api = {
     game: (): Promise<AdoptCandidate[]> => ipcRenderer.invoke('scan:game'),
     import: (candidates: AdoptCandidate[]): Promise<{ adopted: number; staged: StagedMod[] }> =>
       ipcRenderer.invoke('scan:import', candidates)
+  },
+  profiles: {
+    list: (): Promise<Profile[]> => ipcRenderer.invoke('profiles:list'),
+    active: (): Promise<string | null> => ipcRenderer.invoke('profiles:active'),
+    create: (name: string, fromCurrent = true): Promise<Profile> =>
+      ipcRenderer.invoke('profiles:create', name, fromCurrent),
+    rename: (id: string, name: string): Promise<Profile | null> =>
+      ipcRenderer.invoke('profiles:rename', id, name),
+    remove: (id: string): Promise<void> => ipcRenderer.invoke('profiles:delete', id),
+    saveCurrent: (id: string): Promise<Profile | null> => ipcRenderer.invoke('profiles:saveCurrent', id),
+    apply: (id: string): Promise<ApplyResult> => ipcRenderer.invoke('profiles:apply', id)
+  },
+  db: {
+    table: (table: TableName): Promise<TableRow[]> => ipcRenderer.invoke('db:table', table),
+    validate: (table: TableName, id: string, text: string): Promise<ValidationResult> =>
+      ipcRenderer.invoke('db:validate', table, id, text),
+    save: (table: TableName, id: string, text: string): Promise<ValidationResult> =>
+      ipcRenderer.invoke('db:save', table, id, text),
+    rescan: (): Promise<RescanResult> => ipcRenderer.invoke('db:rescan')
   },
   settings: {
     get: (): Promise<AppSettings> => ipcRenderer.invoke('settings:get'),

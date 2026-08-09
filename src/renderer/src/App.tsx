@@ -5,6 +5,7 @@ import { StageDialog } from './components/StageDialog'
 import { Toasts } from './components/Toasts'
 import { Library } from './views/Library'
 import { ModDetail } from './views/ModDetail'
+import { EditView } from './views/EditView'
 import { SettingsView } from './views/SettingsView'
 import { useStore } from './state'
 
@@ -38,6 +39,10 @@ function Sidebar(): JSX.Element {
           <span aria-hidden>🎒</span>
           <span>All mods</span>
           <span className="nav-count">{mods.length}</span>
+        </button>
+        <button className={`nav-item ${view === 'edit' ? 'active' : ''}`} onClick={() => go('edit')}>
+          <span aria-hidden>🗃️</span>
+          <span>Edit</span>
         </button>
         <button className={`nav-item ${view === 'settings' ? 'active' : ''}`} onClick={() => go('settings')}>
           <span aria-hidden>⚙️</span>
@@ -158,6 +163,8 @@ export default function App(): JSX.Element {
               </div>
               <h2>Looking for Palworld…</h2>
             </div>
+          ) : view === 'edit' ? (
+            <EditView />
           ) : view === 'settings' ? (
             <SettingsView />
           ) : view === 'detail' && mod ? (

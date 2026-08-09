@@ -23,6 +23,7 @@ it silently not work. PalMod reads the contents and routes each file:
 | Blueprint mods | `Pal/Content/Paks/LogicMods` |
 | Lua script mods | `Pal/Binaries/Win64/ue4ss/Mods/<Mod>` |
 | Native `.dll` mods | `…/ue4ss/Mods/<Mod>/dlls` |
+| PalSchema JSON mods | `…/ue4ss/Mods/PalSchema/mods/<Mod>` |
 | UE4SS itself | `Pal/Binaries/Win64` |
 | Save data | `%LOCALAPPDATA%/Pal/Saved` |
 
@@ -58,6 +59,18 @@ balance.
 exclusive versions, they're shown as pickable options. Every option is kept in
 the vault at install time, so switching from one look to another is instant and
 doesn't need a re-download.
+
+**Edit tab.** A tabbed data grid over PalMod's own database — Mods, Profiles
+and Settings — with a live raw JSON editor for the selected record. Edits are
+validated as you type and cannot be saved while invalid, since a malformed
+record would break the library on next launch. After a save you're offered a
+full re-scan of the mod folder to reconcile the library with what's actually on
+disk.
+
+**Profiles.** Named mod loadouts. Save your current setup as a profile, then
+switch between them — applying one enables exactly its mods and disables the
+rest, using the same per-kind logic the toggles use, so the game folder ends up
+genuinely valid rather than just the database.
 
 **Takes over mods you already have.** Already modded the game by hand, or have a
 folder of downloads on your desktop? *Settings → Import existing mods* scans a
@@ -110,7 +123,7 @@ quicker for testing.
 npm test
 ```
 
-Five suites, all against real files on disk: a unit pass over the parsers
+Six suites, all against real files on disk: a unit pass over the parsers
 (`.pak` index reader, `.utoc` chunk reader, mod-config parsing and write-back,
 readme/Lua hotkey extraction), a pass over the Get-info lookup (search-term
 building, match scoring, result parsing), and an end-to-end pass that builds a
@@ -122,8 +135,8 @@ toggles, switches variants, adopts and uninstalls against it.
 - Built for the Windows versions of Palworld (Steam, Game Pass and Epic paths are
   all auto-detected). The code has no Windows-only calls, but the install paths it
   targets are the Windows ones.
-- Script and blueprint mods need [UE4SS](https://github.com/UE4SS-RE/RE-UE4SS)
-  installed. PalMod detects whether it's present and warns you before installing
+- Script, blueprint and PalSchema mods need their framework installed
+  ([UE4SS](https://github.com/UE4SS-RE/RE-UE4SS) / PalSchema). PalMod detects whether it's present and warns you before installing
   a mod that needs it — it doesn't install UE4SS for you.
 - Some mod hosts (Nexus in particular) put downloads behind a login or a
   redirect, so a direct paste of a page URL may not be downloadable. Downloading

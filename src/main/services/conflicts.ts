@@ -232,7 +232,22 @@ export async function detectConflicts(
   }
 
   // --- Requirements ---------------------------------------------------------
-  const needsUe4ss = input.kind === 'ue4ss-lua' || input.kind === 'ue4ss-dll' || input.kind === 'logicmod'
+  if (input.kind === 'palschema' && !input.install.palSchemaInstalled) {
+    conflicts.push({
+      type: 'missing-requirement',
+      severity: 'blocking',
+      message: 'This is a PalSchema mod and needs the PalSchema framework, which is not installed.',
+      withModIds: [],
+      details: [`Expected PalSchema in ${input.install.ue4ssModsDir}`],
+      resolutions: ['install-anyway', 'cancel']
+    })
+  }
+
+  const needsUe4ss =
+    input.kind === 'ue4ss-lua' ||
+    input.kind === 'ue4ss-dll' ||
+    input.kind === 'logicmod' ||
+    input.kind === 'palschema'
   if (needsUe4ss && !input.install.ue4ssInstalled) {
     conflicts.push({
       type: 'missing-requirement',

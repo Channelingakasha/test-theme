@@ -905,6 +905,122 @@ h3 {
   color: var(--text-mute);
 }
 
+/* --- edit tab: data grid + raw json --------------------------- */
+
+.edit-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(360px, 1fr);
+  gap: var(--gap);
+  align-items: start;
+}
+
+@media (max-width: 1180px) {
+  .edit-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.grid-scroll {
+  max-height: 64vh;
+  overflow: auto;
+}
+
+.data-grid {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.data-grid th {
+  position: sticky;
+  top: 0;
+  background: var(--surface-2);
+  color: var(--text-mute);
+  text-align: left;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.data-grid td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--text-dim);
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.data-grid tbody tr {
+  cursor: pointer;
+  transition: background 0.14s var(--ease);
+}
+
+.data-grid tbody tr:hover {
+  background: var(--surface-2);
+}
+
+.data-grid tbody tr.selected {
+  background: rgba(92, 200, 255, 0.1);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.data-grid tbody tr.selected td {
+  color: var(--text);
+}
+
+.json-editor {
+  width: 100%;
+  min-height: 360px;
+  resize: vertical;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 16px;
+  color: var(--text);
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.6;
+  outline: none;
+  tab-size: 2;
+  user-select: text;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+}
+
+.json-editor:focus {
+  border-color: var(--accent-dim);
+  box-shadow: 0 0 0 4px var(--accent-glow);
+}
+
+.validation {
+  margin-top: 14px;
+  padding: 13px 16px;
+  border-radius: var(--r-md);
+  font-size: 12.5px;
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  line-height: 1.6;
+}
+
+.validation.ok {
+  background: rgba(74, 222, 128, 0.08);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  color: var(--success);
+}
+
+.validation.bad {
+  background: rgba(248, 113, 113, 0.07);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  color: var(--danger);
+}
+
 /* --- what a mod changes --------------------------------------- */
 
 .target-row {

@@ -116,6 +116,11 @@ export async function describeInstall(root: string, edition: GameEdition): Promi
   const paksDir = path.join(root, 'Pal', 'Content', 'Paks')
   const binariesDir = path.join(root, 'Pal', 'Binaries', 'Win64')
   const ue4ss = await resolveUe4ss(binariesDir)
+
+  // PalSchema is a UE4SS mod that loads JSON definitions from its own mods
+  // folder, so it lives alongside the other UE4SS mods.
+  const palSchemaRoot = path.join(ue4ss.modsDir, 'PalSchema')
+
   return {
     root,
     edition,
@@ -126,6 +131,8 @@ export async function describeInstall(root: string, edition: GameEdition): Promi
     ue4ssModsDir: ue4ss.modsDir,
     ue4ssInstalled: ue4ss.installed,
     ue4ssVersion: ue4ss.version,
+    palSchemaDir: path.join(palSchemaRoot, 'mods'),
+    palSchemaInstalled: await isDir(palSchemaRoot),
     valid: await looksLikePalworld(root)
   }
 }

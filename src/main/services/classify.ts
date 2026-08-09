@@ -62,11 +62,17 @@ function isVariantFolderName(name: string): boolean {
  * an empty string means the payload root itself is the mod folder, in which
  * case `fallbackName` supplies the name to install under.
  */
-function classifyFile(f: WalkedFile, luaModRoots: string[], fallbackName: string): ClassifiedFile {
+function classifyFile(
+  f: WalkedFile,
+  luaModRoots: string[],
+  fallbackName: string,
+  palSchema: PalSchemaLayout | null
+): ClassifiedFile {
   const rel = posix(f.rel)
   const ext = path.extname(rel).toLowerCase()
   const base = path.basename(rel).toLowerCase()
   const segs = segments(rel)
+  const palSchemaRel = palSchema ? palSchemaDestRel(rel, palSchema, fallbackName) : null
 
   // UE4SS itself — the loader files that sit next to the game exe.
   if (
@@ -89,6 +95,11 @@ function classifyFile(f: WalkedFile, luaModRoots: string[], fallbackName: string
     }
   }
 
+  // PalSchema mods are JSON definitions living under a PalSchema/mods tree.
+  if (palSchemaRel !== null) {
+    return { ...f, kind: 'palschema', destRel: palSchemaRel }
+  }
+
   if (CONTAINER_EXT.has(ext)) {
     // Blueprint mods must land in LogicMods or BPModLoader won't see them.
     const kind: ModKind = hasSegment(rel, 'LogicMods') ? 'logicmod' : 'pak'
@@ -105,6 +116,62 @@ function classifyFile(f: WalkedFile, luaModRoots: string[], fallbackName: string
   }
 
   return { ...f, kind: 'unknown', destRel: rel, ignored: true }
+}
+
+/**
+ * How a payload's PalSchema content is arranged.
+ * `prefix` is the part of each path to strip before re-rooting under the
+ * game's PalSchema mods folder.
+ */
+export interface PalSchemaLayout {
+  prefix: string
+  /** True when the archive already contains its own mod-name folder. */
+  hasOwnFolder: boolean
+}
+
+/**
+ * Detect PalSchema content. It ships as JSON definitions, either inside a
+ * `PalSchema/mods/<Name>/` tree or as a bare folder of JSON files.
+ */
+function findPalSchema(files: WalkedFile[]): PalSchemaLayout | null {
+  const rels = files.map((f) => posix(f.rel))
+  const jsonFiles = rels.filter((r) => r.toLowerCase().endsWith('.json'))
+  if (jsonFiles.length === 0) return null
+
+  // Explicit layout: .../PalSchema/mods/<Name>/...
+  for (const rel of rels) {
+    const m = rel.match(/^(.*?\bPalSchema\/mods\/)/i)
+    if (m) return { prefix: m[1], hasOwnFolder: true }
+  }
+  // A bare PalSchema folder without the mods/ level.
+  for (const rel of rels) {
+    const m = rel.match(/^(.*?\bPalSchema\/)/i)
+    if (m) return { prefix: m[1], hasOwnFolder: true }
+  }
+
+  // Otherwise: a payload that is essentially only JSON is a schema mod. Paks
+  // and Lua scripts mean it's something else that happens to ship a config.
+  const disqualifying = rels.filter((r) =>
+    /\.(pak|ucas|utoc|lua|dll|sav)$/i.test(r)
+  )
+  if (disqualifying.length > 0) return null
+  if (jsonFiles.length / rels.length < 0.5) return null
+
+  return { prefix: '', hasOwnFolder: false }
+}
+
+/** Destination for a PalSchema file, relative to the PalSchema mods folder. */
+function palSchemaDestRel(rel: string, layout: PalSchemaLayout, fallbackName: string): string | null {
+  if (!rel.toLowerCase().endsWith('.json')) {
+    // Non-JSON extras only travel with an explicit PalSchema tree.
+    if (!layout.hasOwnFolder) return null
+  }
+  if (layout.prefix) {
+    if (!rel.toLowerCase().startsWith(layout.prefix.toLowerCase())) return null
+    const inner = rel.slice(layout.prefix.length)
+    return inner || null
+  }
+  return `${fallbackName}/${rel}`
 }
 
 /**
@@ -219,7 +286,7 @@ function dominantKind(files: ClassifiedFile[]): ModKind {
     counts.set(f.kind, (counts.get(f.kind) ?? 0) + 1)
   }
   if (counts.get('ue4ss-core')) return 'ue4ss-core'
-  const order: ModKind[] = ['ue4ss-lua', 'ue4ss-dll', 'logicmod', 'pak', 'save']
+  const order: ModKind[] = ['palschema', 'ue4ss-lua', 'ue4ss-dll', 'logicmod', 'pak', 'save']
   let best: ModKind = 'unknown'
   let bestN = 0
   for (const k of order) {
@@ -240,7 +307,9 @@ export async function classifyStage(stageDir: string, fallbackName = 'Mod'): Pro
   const walked = await walk(stageDir)
   const luaModRoots = findLuaModRoots(walked)
   const safeName = fallbackName.replace(/[\\/:*?"<>|]/g, '').trim() || 'Mod'
-  const files = walked.map((f) => classifyFile(f, luaModRoots, safeName))
+  // A Lua mod's own config.json must not be mistaken for a PalSchema mod.
+  const palSchema = luaModRoots.length > 0 ? null : findPalSchema(walked)
+  const files = walked.map((f) => classifyFile(f, luaModRoots, safeName, palSchema))
 
   const { options, suggested } = detectOptions(files)
 
@@ -270,6 +339,8 @@ export function destinationFor(file: ClassifiedFile, install: GameInstall, saved
       return path.join(install.ue4ssModsDir, file.destRel)
     case 'ue4ss-core':
       return path.join(install.binariesDir, file.destRel)
+    case 'palschema':
+      return path.join(install.palSchemaDir, file.destRel)
     case 'save':
       return path.join(savedDir, file.destRel)
     default:

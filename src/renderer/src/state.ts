@@ -9,7 +9,7 @@ import type {
   StagedMod
 } from '@shared/types'
 
-export type View = 'library' | 'detail' | 'settings'
+export type View = 'library' | 'detail' | 'settings' | 'edit'
 export type Filter = 'all' | 'enabled' | 'disabled' | 'conflicts'
 
 export interface Toast {

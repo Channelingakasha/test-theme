@@ -73,6 +73,8 @@ export function kindLabel(kind: ModKind): string {
       return 'Native'
     case 'ue4ss-core':
       return 'UE4SS'
+    case 'palschema':
+      return 'PalSchema'
     case 'save':
       return 'Save data'
     default:
@@ -92,6 +94,8 @@ export function kindIcon(kind: ModKind): string {
       return '⚙️'
     case 'ue4ss-core':
       return '🔌'
+    case 'palschema':
+      return '🧾'
     case 'save':
       return '💾'
     default:

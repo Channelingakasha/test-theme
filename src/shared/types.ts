@@ -10,6 +10,7 @@ export type ModKind =
   | 'ue4ss-lua' // script mod -> Pal/Binaries/Win64/ue4ss/Mods/<Name>
   | 'ue4ss-dll' // native C++ mod -> Pal/Binaries/Win64/ue4ss/Mods/<Name>/dlls
   | 'ue4ss-core' // UE4SS itself -> Pal/Binaries/Win64
+  | 'palschema' // PalSchema JSON mod -> .../ue4ss/Mods/PalSchema/mods/<Name>
   | 'save' // save-game / config payloads -> %LOCALAPPDATA%/Pal/Saved
   | 'unknown'
 
@@ -33,6 +34,9 @@ export interface GameInstall {
   ue4ssModsDir: string
   ue4ssInstalled: boolean
   ue4ssVersion?: string
+  /** Absolute path of the PalSchema mods folder. */
+  palSchemaDir: string
+  palSchemaInstalled: boolean
   valid: boolean
 }
 
@@ -261,6 +265,57 @@ export interface LookupCandidate {
   image?: string
   /** 0..1 — how well this result matches the mod we're looking up. */
   score: number
+}
+
+/**
+ * A named mod loadout. Switching profiles enables exactly the mods it lists
+ * and disables the rest, so different playthroughs can keep different setups.
+ */
+export interface Profile {
+  id: string
+  name: string
+  /** Ids of the mods this profile has switched on. */
+  enabledModIds: string[]
+  createdAt: number
+  updatedAt: number
+  notes?: string
+}
+
+/* --- raw database editing (the Edit tab) ------------------------------- */
+
+export type TableName = 'mods' | 'profiles' | 'settings'
+
+/** One row as the grid shows it: an id, summary columns, and the full record. */
+export interface TableRow {
+  id: string
+  label: string
+  columns: Record<string, string | number | boolean>
+  record: unknown
+}
+
+export interface ValidationResult {
+  ok: boolean
+  errors: string[]
+  /** Pretty-printed JSON, when it parsed. */
+  formatted?: string
+}
+
+export interface RescanResult {
+  checked: number
+  /** Mods whose files are no longer on disk. */
+  missingFiles: string[]
+  /** Mods whose state was corrected to match what's actually installed. */
+  corrected: string[]
+  settingsRefreshed: number
+}
+
+/** Outcome of switching to a profile. */
+export interface ApplyResult {
+  enabled: number
+  disabled: number
+  /** Mods the profile referenced that are no longer installed. */
+  missing: string[]
+  failed: { modId: string; error: string }[]
 }
 
 export interface AdoptCandidate {

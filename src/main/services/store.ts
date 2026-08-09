@@ -1,11 +1,13 @@
 import { app } from 'electron'
 import path from 'node:path'
-import type { AppSettings, Mod } from '@shared/types'
+import type { AppSettings, Mod, Profile } from '@shared/types'
 import { ensureDir, readJsonIfExists, writeJson } from './fsx'
 
 interface Db {
   version: number
   mods: Mod[]
+  profiles: Profile[]
+  activeProfileId?: string
   settings: AppSettings
 }
 
@@ -39,12 +41,16 @@ export function stagingDir(): string {
   return path.join(dataDir(), 'staging')
 }
 
+export type { Db }
+
 export async function loadDb(): Promise<Db> {
   if (db) return db
   const loaded = await readJsonIfExists<Db>(dbPath())
-  db = loaded ?? { version: 1, mods: [], settings: DEFAULT_SETTINGS }
+  db = loaded ?? { version: 1, mods: [], profiles: [], settings: DEFAULT_SETTINGS }
   db.settings = { ...DEFAULT_SETTINGS, ...db.settings }
   if (!Array.isArray(db.mods)) db.mods = []
+  // Databases written before profiles existed have no array here.
+  if (!Array.isArray(db.profiles)) db.profiles = []
   await ensureDir(vaultDir())
   await ensureDir(imageCacheDir())
   return db

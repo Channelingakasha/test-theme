@@ -15,7 +15,8 @@
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "dist:win": "npm run build && electron-builder --win",
     "dist:dir": "npm run build && electron-builder --dir",
-    "test": "node tests/run.mjs"
+    "test": "node tests/run.mjs",
+    "icons": "electron build/make-icons.mjs"
   },
   "dependencies": {
     "7zip-bin": "^5.2.0",
@@ -49,7 +50,8 @@
     },
     "files": [
       "out/**/*",
-      "package.json"
+      "package.json",
+      "build/icon.png"
     ],
     "asarUnpack": [
       "**/node_modules/7zip-bin/**/*"
@@ -58,11 +60,18 @@
       "target": [
         "nsis",
         "portable"
-      ]
+      ],
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
+    },
+    "linux": {
+      "icon": "build/icon.png",
+      "target": [
+        "AppImage"
+      ]
     }
   }
 }

@@ -7,7 +7,13 @@ import type {
   LookupCandidate,
   Mod,
   ModSetting,
-  StagedMod
+  Profile,
+  RescanResult,
+  StagedMod,
+  TableName,
+  TableRow,
+  ValidationResult,
+  ApplyResult
 } from '@shared/types'
 import { adoptInPlace, isInsideGame, scanFolder, scanGameFolders } from './services/adopt'
 import { detectGame, describeInstall, ensureModDirs, resolveUserPickedRoot } from './services/gameDetect'
@@ -23,7 +29,17 @@ import {
   type InstallChoices
 } from './services/installer'
 import { targetsForMod } from './services/conflicts'
+import { listTable, rescan, saveRecord, validateRecord } from './services/db'
 import { applyLookup, lookupMod } from './services/lookup'
+import {
+  activeProfileId,
+  applyProfile,
+  createProfile,
+  deleteProfile,
+  listProfiles,
+  renameProfile,
+  saveCurrentToProfile
+} from './services/profiles'
 import { writeSetting } from './services/modConfig'
 import { getMods, getSettings, setSettings, upsertMod } from './services/store'
 import { exists } from './services/fsx'
@@ -250,6 +266,47 @@ export function registerIpc(getWindow: Send): void {
       return { adopted: adopted.length, staged }
     }
   )
+
+  // --- profiles ------------------------------------------------------------
+  ipcMain.handle('profiles:list', async (): Promise<Profile[]> => listProfiles())
+
+  ipcMain.handle('profiles:active', async (): Promise<string | null> => activeProfileId())
+
+  ipcMain.handle('profiles:create', async (_e, name: string, fromCurrent: boolean): Promise<Profile> =>
+    createProfile(name, fromCurrent)
+  )
+
+  ipcMain.handle('profiles:rename', async (_e, id: string, name: string): Promise<Profile | null> =>
+    renameProfile(id, name)
+  )
+
+  ipcMain.handle('profiles:delete', async (_e, id: string): Promise<void> => deleteProfile(id))
+
+  ipcMain.handle('profiles:saveCurrent', async (_e, id: string): Promise<Profile | null> =>
+    saveCurrentToProfile(id)
+  )
+
+  ipcMain.handle('profiles:apply', async (_e, id: string): Promise<ApplyResult> => {
+    const install = await requireInstall()
+    return applyProfile(id, install)
+  })
+
+  // --- raw database editing -------------------------------------------------
+  ipcMain.handle('db:table', async (_e, table: TableName): Promise<TableRow[]> => listTable(table))
+
+  ipcMain.handle(
+    'db:validate',
+    async (_e, table: TableName, id: string, text: string): Promise<ValidationResult> =>
+      validateRecord(table, id, text)
+  )
+
+  ipcMain.handle(
+    'db:save',
+    async (_e, table: TableName, id: string, text: string): Promise<ValidationResult> =>
+      saveRecord(table, id, text)
+  )
+
+  ipcMain.handle('db:rescan', async (): Promise<RescanResult> => rescan())
 
   // --- settings ------------------------------------------------------------
   ipcMain.handle('settings:get', async (): Promise<AppSettings> => getSettings())
